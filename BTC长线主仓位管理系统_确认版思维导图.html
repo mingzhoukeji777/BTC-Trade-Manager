@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BTC长线主仓位管理系统 - 确认版思维导图</title>
+<style>
+:root{--ivory:#FAF9F5;--white:#FFFFFF;--slate:#141413;--clay:#D97757;--olive:#788C5D;--rust:#B04A3F;--oat:#E3DACC;--gray-150:#F0EEE6;--gray-300:#D1CFC5;--gray-500:#87867F;--gray-700:#3D3D3A;--border:1.5px solid var(--gray-300);--radius-panel:12px;--sans:system-ui,-apple-system,"Segoe UI",Roboto,"Microsoft YaHei UI",sans-serif;--serif:ui-serif,Georgia,"Times New Roman",serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,"Microsoft YaHei UI",monospace}*{box-sizing:border-box;margin:0;padding:0}body{background:var(--ivory);color:var(--gray-700);font-family:var(--sans);line-height:1.55;padding:34px 22px 80px}.page{max-width:1380px;margin:0 auto}.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--gray-500)}h1{font-family:var(--serif);font-weight:500;font-size:38px;color:var(--slate);margin:6px 0 10px}.lead{font-size:16px;max-width:1050px}.legend{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 20px}.legend span,.pill{font-family:var(--mono);font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--gray-300);background:var(--white)}.map-wrap{background:var(--white);border:var(--border);border-radius:18px;padding:12px;overflow:auto;box-shadow:0 12px 34px rgba(20,20,19,.06)}svg{width:100%;min-width:1100px;height:auto;display:block}.node rect{fill:#fff;stroke:var(--gray-300);stroke-width:1.5}.node.core rect{fill:rgba(217,119,87,.12);stroke:var(--clay);stroke-width:2}.node.ok rect{fill:rgba(120,140,93,.13);stroke:var(--olive);stroke-width:2}.node.risk rect{fill:rgba(176,74,63,.09);stroke:var(--rust);stroke-width:2}.node.neutral rect{fill:var(--gray-150)}.title{font:700 15px var(--sans);fill:var(--slate)}.sub{font:12px var(--mono);fill:var(--gray-700)}.small{font:10.5px var(--mono);fill:var(--gray-500)}.edge{stroke:var(--gray-500);stroke-width:1.6;fill:none;marker-end:url(#arrow)}.edge.hot{stroke:var(--clay);stroke-width:2}.edge.ok{stroke:var(--olive);stroke-width:2}.edge.risk{stroke:var(--rust);stroke-width:2}.lbl{font:11px var(--mono);fill:var(--gray-500);paint-order:stroke;stroke:#fff;stroke-width:4px}.section{margin-top:22px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{background:var(--white);border:var(--border);border-radius:var(--radius-panel);padding:18px}h2{font-family:var(--serif);font-weight:500;color:var(--slate);margin-bottom:10px}.list{padding-left:18px}.list li{margin:8px 0}.tag{font-family:var(--mono);font-size:11px;border-radius:6px;padding:1px 6px;background:rgba(120,140,93,.16);color:var(--olive);font-weight:700}.bad{background:rgba(176,74,63,.16);color:var(--rust)}.focus{background:rgba(217,119,87,.14);color:var(--clay)}table{width:100%;border-collapse:collapse;font-size:14px}th{font-family:var(--mono);font-size:12px;text-align:left;background:var(--gray-150);padding:8px;border-bottom:1px solid var(--gray-300)}td{padding:8px;border-bottom:1px solid var(--gray-150);vertical-align:top}.note{border-left:4px solid var(--clay);background:rgba(217,119,87,.06);border-radius:8px;padding:12px 14px;margin-top:14px}@media(max-width:900px){.grid{grid-template-columns:1fr}h1{font-size:30px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="eyebrow">CONFIRMED BTC POSITION TREE MODEL · V2</div>
+  <h1>BTC 长线主仓位管理系统确认版思维导图</h1>
+  <p class="lead">确认后的核心：<strong>Binance U本位永续</strong> 和 <strong>OKX 币本位永续</strong> 是两个独立长线主仓系统，可通过切换按钮/下拉框选择；每个主仓下面挂加仓、对冲、减仓、止盈、止损等节点，每个节点都像“小主仓位分支”一样独立计算盈亏、持仓、手续费、成本止损和移动止盈。</p>
+  <div class="legend"><span>橙色 = 主仓核心</span><span>绿色 = 节点/保护规则</span><span>红色 = 风险/异常/待处理</span><span>灰色 = 数据/API/记录</span></div>
+
+  <div class="map-wrap section">
+    <svg viewBox="0 0 1320 960" aria-label="确认版思维导图">
+      <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1 L8 5 L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+
+      <g class="node core"><rect x="520" y="28" width="280" height="76" rx="14"/><text class="title" x="660" y="56" text-anchor="middle">BTC 长线主仓位管理系统</text><text class="sub" x="660" y="79" text-anchor="middle">熊底多头主仓 → 牛顶空头主仓</text><text class="small" x="660" y="96" text-anchor="middle">每个操作节点都能独立核算并影响主仓风险</text></g>
+
+      <g class="node core"><rect x="100" y="150" width="230" height="92" rx="12"/><text class="title" x="215" y="178" text-anchor="middle">账户选择器</text><text class="sub" x="215" y="202" text-anchor="middle">Binance U本位主仓</text><text class="sub" x="215" y="220" text-anchor="middle">OKX 币本位主仓</text></g>
+      <g class="node core"><rect x="405" y="150" width="230" height="92" rx="12"/><text class="title" x="520" y="178" text-anchor="middle">独立主仓 Root</text><text class="sub" x="520" y="202" text-anchor="middle">M1 / M2 ...</text><text class="small" x="520" y="220" text-anchor="middle">方向/均价/数量/强平/保证金</text></g>
+      <g class="node neutral"><rect x="710" y="150" width="230" height="92" rx="12"/><text class="title" x="825" y="178" text-anchor="middle">订单/API 数据池</text><text class="sub" x="825" y="202" text-anchor="middle">成交订单 / 手续费 / 资金费</text><text class="small" x="825" y="220" text-anchor="middle">交易所订单号绑定</text></g>
+      <g class="node risk"><rect x="1015" y="150" width="230" height="92" rx="12"/><text class="title" x="1130" y="178" text-anchor="middle">待归类订单池</text><text class="sub" x="1130" y="202" text-anchor="middle">无法自动识别时</text><text class="small" x="1130" y="220" text-anchor="middle">手动选择：加仓/对冲/止盈/止损</text></g>
+
+      <path class="edge hot" d="M660 104 C610 125 545 130 520 150"/><path class="edge hot" d="M330 196 L405 196"/><path class="edge" d="M635 196 L710 196"/><path class="edge risk" d="M940 196 L1015 196"/><path class="edge risk" d="M1130 242 C1050 285 650 275 535 242"/>
+      <text class="lbl" x="345" y="185">切换/下拉选择</text><text class="lbl" x="642" y="185">自动匹配</text><text class="lbl" x="948" y="185">匹配失败</text>
+
+      <g class="node ok"><rect x="50" y="350" width="240" height="108" rx="12"/><text class="title" x="170" y="378" text-anchor="middle">加仓分支 A1/A2</text><text class="sub" x="170" y="402" text-anchor="middle">独立小主仓位</text><text class="small" x="170" y="421" text-anchor="middle">持仓大小 / 浮盈亏 / 手续费</text><text class="small" x="170" y="438" text-anchor="middle">盈亏平衡 / 成本止损 / 移动止盈</text></g>
+      <g class="node ok"><rect x="355" y="350" width="240" height="108" rx="12"/><text class="title" x="475" y="378" text-anchor="middle">对冲分支 H1/H2</text><text class="sub" x="475" y="402" text-anchor="middle">反向保护小主仓</text><text class="small" x="475" y="421" text-anchor="middle">对冲盈亏 / 手续费 / 解锁条件</text><text class="small" x="475" y="438" text-anchor="middle">成本止损 / 移动止盈 / 平仓映射</text></g>
+      <g class="node ok"><rect x="660" y="350" width="240" height="108" rx="12"/><text class="title" x="780" y="378" text-anchor="middle">减仓/止盈 TP/R</text><text class="sub" x="780" y="402" text-anchor="middle">分批止盈 / 降风险</text><text class="small" x="780" y="421" text-anchor="middle">已实现盈亏 / 手续费</text><text class="small" x="780" y="438" text-anchor="middle">反算剩余主仓风险</text></g>
+      <g class="node risk"><rect x="965" y="350" width="240" height="108" rx="12"/><text class="title" x="1085" y="378" text-anchor="middle">止损/保护 SL</text><text class="sub" x="1085" y="402" text-anchor="middle">成本止损 / 移动止损</text><text class="small" x="1085" y="421" text-anchor="middle">保护加仓/对冲小分支</text><text class="small" x="1085" y="438" text-anchor="middle">不是简单全仓止损</text></g>
+
+      <path class="edge hot" d="M520 242 C470 292 230 295 170 350"/><path class="edge hot" d="M520 242 C505 294 485 310 475 350"/><path class="edge hot" d="M540 242 C610 290 730 310 780 350"/><path class="edge risk" d="M555 242 C740 285 1040 292 1085 350"/>
+
+      <g class="node neutral"><rect x="70" y="565" width="240" height="110" rx="12"/><text class="title" x="190" y="592" text-anchor="middle">订单编号绑定</text><text class="sub" x="190" y="616" text-anchor="middle">内部编号：M/A/H/TP/SL</text><text class="sub" x="190" y="634" text-anchor="middle">交易所订单号：open/close</text><text class="small" x="190" y="654" text-anchor="middle">开仓和平仓订单号可不同</text></g>
+      <g class="node neutral"><rect x="390" y="565" width="240" height="110" rx="12"/><text class="title" x="510" y="592" text-anchor="middle">真实成本引擎</text><text class="sub" x="510" y="616" text-anchor="middle">默认手续费 0.05% 单向</text><text class="sub" x="510" y="634" text-anchor="middle">API真实手续费覆盖默认值</text><text class="small" x="510" y="654" text-anchor="middle">滑点不估算，用真实成交价</text></g>
+      <g class="node neutral"><rect x="710" y="565" width="240" height="110" rx="12"/><text class="title" x="830" y="592" text-anchor="middle">资金费率归集</text><text class="sub" x="830" y="616" text-anchor="middle">API获取每次结算</text><text class="sub" x="830" y="634" text-anchor="middle">计入对应主仓/分支成本</text><text class="small" x="830" y="654" text-anchor="middle">影响总盈亏与持仓成本</text></g>
+      <g class="node risk"><rect x="1030" y="565" width="240" height="110" rx="12"/><text class="title" x="1150" y="592" text-anchor="middle">情景模拟</text><text class="sub" x="1150" y="616" text-anchor="middle">输入目标价</text><text class="sub" x="1150" y="634" text-anchor="middle">计算主仓/分支/强平变化</text><text class="small" x="1150" y="654" text-anchor="middle">推荐移动止盈/减仓/解锁对冲</text></g>
+
+      <path class="edge" d="M170 458 C165 505 178 525 190 565"/><path class="edge" d="M475 458 C480 505 498 525 510 565"/><path class="edge" d="M780 458 C790 505 812 525 830 565"/><path class="edge risk" d="M1085 458 C1115 505 1135 525 1150 565"/>
+      <path class="edge ok" d="M310 620 L390 620"/><path class="edge ok" d="M630 620 L710 620"/><path class="edge risk" d="M950 620 L1030 620"/>
+
+      <g class="node core"><rect x="90" y="780" width="260" height="94" rx="12"/><text class="title" x="220" y="808" text-anchor="middle">主界面</text><text class="sub" x="220" y="832" text-anchor="middle">账户切换 + 主仓树</text><text class="small" x="220" y="852" text-anchor="middle">选节点 → 明细/成本/订单映射</text></g>
+      <g class="node risk"><rect x="430" y="780" width="260" height="94" rx="12"/><text class="title" x="560" y="808" text-anchor="middle">风险总控</text><text class="sub" x="560" y="832" text-anchor="middle">强平距离 / 分支风险</text><text class="small" x="560" y="852" text-anchor="middle">风险对主仓影响实时反算</text></g>
+      <g class="node ok"><rect x="770" y="780" width="260" height="94" rx="12"/><text class="title" x="900" y="808" text-anchor="middle">动作建议</text><text class="sub" x="900" y="832" text-anchor="middle">移动止盈/成本止损/减仓</text><text class="small" x="900" y="852" text-anchor="middle">只建议，不自动下单</text></g>
+      <path class="edge hot" d="M190 675 C195 725 210 745 220 780"/><path class="edge risk" d="M510 675 C530 725 550 745 560 780"/><path class="edge ok" d="M1150 675 C1080 735 970 748 900 780"/>
+    </svg>
+  </div>
+
+  <div class="grid section">
+    <div class="card">
+      <h2>确认后的核心软件模块</h2>
+      <ul class="list">
+        <li><span class="tag focus">账户选择</span> Binance U本位主仓 / OKX 币本位主仓，独立切换，互不混淆。</li>
+        <li><span class="tag focus">主仓树</span> M 主仓下面挂 A 加仓、H 对冲、TP 止盈、SL 止损、R 减仓。</li>
+        <li><span class="tag">小主仓分支</span> 每个加仓/对冲都独立显示持仓大小、浮盈亏、手续费、盈亏平衡、成本止损、移动止盈。</li>
+        <li><span class="tag bad">待归类订单</span> API 获取订单后无法自动判断关系时，进入待处理池，手动绑定节点类型和父节点。</li>
+        <li><span class="tag">情景模拟</span> 输入 BTC 目标价，模拟主仓和所有分支的盈亏、强平距离、建议动作。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>编号规则建议</h2>
+      <table><thead><tr><th>节点类型</th><th>编号</th><th>说明</th></tr></thead><tbody>
+        <tr><td>主仓</td><td>M1 / M2</td><td>一个牛熊周期的核心仓位</td></tr>
+        <tr><td>加仓</td><td>A1 / A2</td><td>挂在某个主仓下，可有自己的止盈止损</td></tr>
+        <tr><td>对冲</td><td>H1 / H2</td><td>反向保护仓，需绑定开/平订单</td></tr>
+        <tr><td>止盈</td><td>TP1 / TP2</td><td>分批止盈或移动止盈</td></tr>
+        <tr><td>止损</td><td>SL1 / SL2</td><td>成本止损或保护止损</td></tr>
+        <tr><td>减仓</td><td>R1 / R2</td><td>降低主仓风险或释放保证金</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h2>费用与真实成交价规则</h2>
+    <ul class="list">
+      <li><strong>默认手续费：</strong>统一按 <span class="pill">0.05% 单向</span> 估算。</li>
+      <li><strong>真实手续费：</strong>如果 API 能获取订单真实手续费，则用真实手续费覆盖默认估算，并计入主仓/加仓/对冲/止盈节点。</li>
+      <li><strong>滑点：</strong>不做估算，直接使用 API 获取到的真实成交开仓价和平仓价。</li>
+      <li><strong>资金费率：</strong>通过 API 获取每次结算资金费，归入对应交易所主仓位成本/收益，并影响总盈亏。</li>
+    </ul>
+  </div>
+
+  <div class="card section">
+    <h2>订单自动匹配逻辑</h2>
+    <table><thead><tr><th>情况</th><th>处理方式</th></tr></thead><tbody>
+      <tr><td>开仓订单能通过时间/方向/数量/价格匹配到某个计划节点</td><td>自动绑定到 A/H/M 节点，并记录交易所订单号。</td></tr>
+      <tr><td>平仓订单与开仓订单号不同</td><td>通过成交方向、数量、时间、价格区间、已有节点状态进行候选匹配。</td></tr>
+      <tr><td>无法确定是加仓、对冲、止盈还是止损</td><td>进入“待归类订单池”，弹出提示，手动选择节点类型和父节点。</td></tr>
+      <tr><td>部分成交/多笔成交</td><td>合并为一个节点成交明细，也保留每笔原始订单记录。</td></tr>
+    </tbody></table>
+  </div>
+
+  <div class="card section">
+    <h2>下一步重构管理软件 v0.2 的准确目标</h2>
+    <ul class="list">
+      <li>删除“短线/波段/长线账户”框架，改为 <strong>Binance 主仓 / OKX 主仓</strong> 独立切换。</li>
+      <li>建立数据库表：主仓表、节点表、订单映射表、手续费/资金费表、情景模拟表。</li>
+      <li>主界面做成：左侧主仓树，中间风险总控，右侧节点明细，底部风险提示。</li>
+      <li>每个加仓/对冲节点都作为独立分支计算，不再只是普通交易记录。</li>
+      <li>先不自动交易，只做记录、计算、提示和推荐动作。</li>
+    </ul>
+    <div class="note"><strong>确认结论：</strong>这个确认版结构才是后续 C# 管理软件应采用的主框架。之前 v0.1 只保留少量读取采集器和 SQLite 的基础代码，业务模型要重构。</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BTC长线主仓位管理系统 - 思维导图</title>
+<style>
+:root {
+  --ivory:#FAF9F5; --white:#FFFFFF; --slate:#141413; --clay:#D97757; --olive:#788C5D; --rust:#B04A3F; --oat:#E3DACC;
+  --gray-150:#F0EEE6; --gray-300:#D1CFC5; --gray-500:#87867F; --gray-700:#3D3D3A;
+  --border:1.5px solid var(--gray-300); --radius-panel:12px; --radius-row:8px; --radius-pill:999px;
+  --serif:ui-serif, Georgia, "Times New Roman", serif; --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Microsoft YaHei UI",sans-serif; --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Microsoft YaHei UI",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0} body{background:var(--ivory);color:var(--gray-700);font-family:var(--sans);line-height:1.55;padding:36px 24px 80px}.page{max-width:1320px;margin:0 auto}.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-500)}h1{font-family:var(--serif);font-size:38px;font-weight:500;letter-spacing:-.02em;color:var(--slate);margin:6px 0 10px}.lead{font-size:16px;max-width:920px}.pill{display:inline-block;border-radius:var(--radius-pill);background:var(--oat);padding:3px 10px;font-family:var(--mono);font-size:12px;color:var(--slate);margin-right:6px}.card{background:var(--white);border:var(--border);border-radius:var(--radius-panel);padding:18px}.section{margin-top:24px}.legend{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 22px}.legend span{font-family:var(--mono);font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--gray-300);background:var(--white)}.map-wrap{background:var(--white);border:var(--border);border-radius:18px;padding:12px;overflow:auto;box-shadow:0 12px 34px rgba(20,20,19,.06)}svg{min-width:1240px;display:block}.node rect{fill:#fff;stroke:var(--gray-300);stroke-width:1.5}.node.core rect{fill:rgba(217,119,87,.12);stroke:var(--clay);stroke-width:2}.node.ok rect{fill:rgba(120,140,93,.13);stroke:var(--olive);stroke-width:2}.node.warn rect{fill:rgba(217,119,87,.08);stroke:var(--clay)}.node.risk rect{fill:rgba(176,74,63,.09);stroke:var(--rust);stroke-width:2}.node.neutral rect{fill:var(--gray-150)}.title{font-family:var(--sans);font-size:15px;font-weight:700;fill:var(--slate)}.sub{font-family:var(--mono);font-size:11px;fill:var(--gray-700)}.small{font-family:var(--mono);font-size:10px;fill:var(--gray-500)}.edge{stroke:var(--gray-500);stroke-width:1.6;fill:none;marker-end:url(#arrow)}.edge.hot{stroke:var(--clay);stroke-width:2}.edge.ok{stroke:var(--olive);stroke-width:2}.edge.risk{stroke:var(--rust);stroke-width:2}.edge.dash{stroke-dasharray:5 5}.lbl{font-family:var(--mono);font-size:11px;fill:var(--gray-500);paint-order:stroke;stroke:#fff;stroke-width:4px}.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.list{padding-left:18px}.list li{margin:8px 0}.tag{font-family:var(--mono);font-size:11px;border-radius:6px;padding:1px 6px;background:rgba(120,140,93,.16);color:var(--olive);font-weight:700}.bad{background:rgba(176,74,63,.16);color:var(--rust)}.focus{background:rgba(217,119,87,.14);color:var(--clay)}table{width:100%;border-collapse:collapse;font-size:14px}th{font-family:var(--mono);font-size:12px;text-align:left;background:var(--gray-150);padding:8px;border-bottom:1px solid var(--gray-300)}td{padding:8px;border-bottom:1px solid var(--gray-150);vertical-align:top}.note{border-left:4px solid var(--clay);background:rgba(217,119,87,.06);border-radius:8px;padding:12px 14px;margin-top:14px}@media(max-width:900px){.grid{grid-template-columns:1fr}body{padding:24px 14px}h1{font-size:30px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="eyebrow">BTC LONG-CYCLE POSITION MANAGEMENT SYSTEM</div>
+  <h1>BTC 长线主仓位管理系统思维导图</h1>
+  <p class="lead">正确主线：Binance U本位永续 + OKX 币本位永续都属于<strong>长线牛熊周期账户</strong>；系统不是短线/波段/长线账户分组，而是围绕“主仓位”管理加仓、对冲、减仓、移动止损、移动止盈、分批止盈与风险联动。</p>
+  <div class="legend">
+    <span>橙色 = 核心主线</span><span>绿色 = 规则/收益保护</span><span>红色 = 风险监控</span><span>灰色 = 数据/记录</span>
+  </div>
+
+  <div class="map-wrap section">
+    <svg viewBox="0 0 1240 900" role="img" aria-label="BTC长线主仓位管理系统思维导图">
+      <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1 L8 5 L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+
+      <g class="node core"><rect x="500" y="30" width="240" height="76" rx="14"/><text class="title" x="620" y="58" text-anchor="middle">长线主仓位系统</text><text class="sub" x="620" y="80" text-anchor="middle">熊底做多 → 牛顶止盈/反手空</text><text class="small" x="620" y="96" text-anchor="middle">全周期：主仓 + 操作树 + 风险联动</text></g>
+
+      <g class="node warn"><rect x="70" y="155" width="220" height="82" rx="12"/><text class="title" x="180" y="182" text-anchor="middle">账户与交易所</text><text class="sub" x="180" y="205" text-anchor="middle">Binance U本位永续</text><text class="sub" x="180" y="222" text-anchor="middle">OKX 币本位永续</text></g>
+      <g class="node core"><rect x="380" y="150" width="220" height="92" rx="12"/><text class="title" x="490" y="178" text-anchor="middle">主仓位 Root</text><text class="sub" x="490" y="201" text-anchor="middle">牛熊周期核心头寸</text><text class="small" x="490" y="220" text-anchor="middle">方向/成本/数量/保证金/强平</text></g>
+      <g class="node core"><rect x="700" y="150" width="220" height="92" rx="12"/><text class="title" x="810" y="178" text-anchor="middle">周期状态机</text><text class="sub" x="810" y="201" text-anchor="middle">熊底建多 → 牛顶平多</text><text class="sub" x="810" y="218" text-anchor="middle">牛顶建空 → 熊底平空</text></g>
+      <g class="node neutral"><rect x="990" y="155" width="190" height="82" rx="12"/><text class="title" x="1085" y="184" text-anchor="middle">采集器数据</text><text class="sub" x="1085" y="207" text-anchor="middle">价格/权益/持仓</text><text class="small" x="1085" y="224" text-anchor="middle">latest_snapshot.json</text></g>
+
+      <path class="edge hot" d="M620 106 C620 128 520 124 500 150"/><path class="edge hot" d="M620 106 C620 128 790 124 810 150"/><path class="edge" d="M290 196 L380 196"/><path class="edge" d="M920 196 L990 196"/><path class="edge" d="M990 238 C940 285 610 260 520 242"/>
+      <text class="lbl" x="316" y="187">同属长线账户</text><text class="lbl" x="925" y="184">实时输入</text>
+
+      <g class="node ok"><rect x="80" y="330" width="210" height="92" rx="12"/><text class="title" x="185" y="358" text-anchor="middle">加仓节点</text><text class="sub" x="185" y="382" text-anchor="middle">加仓价/数量/手续费</text><text class="small" x="185" y="401" text-anchor="middle">盈亏平衡 + 成本止损 + 移动止盈</text></g>
+      <g class="node ok"><rect x="350" y="330" width="210" height="92" rx="12"/><text class="title" x="455" y="358" text-anchor="middle">对冲节点</text><text class="sub" x="455" y="382" text-anchor="middle">反向临时保护仓</text><text class="small" x="455" y="401" text-anchor="middle">对冲成本 + 手续费 + 解锁条件</text></g>
+      <g class="node warn"><rect x="620" y="330" width="210" height="92" rx="12"/><text class="title" x="725" y="358" text-anchor="middle">减仓/止盈节点</text><text class="sub" x="725" y="382" text-anchor="middle">分批止盈/降低风险</text><text class="small" x="725" y="401" text-anchor="middle">影响主仓均价/保证金/强平</text></g>
+      <g class="node ok"><rect x="890" y="330" width="230" height="92" rx="12"/><text class="title" x="1005" y="358" text-anchor="middle">保护规则节点</text><text class="sub" x="1005" y="382" text-anchor="middle">移动到成本止损</text><text class="sub" x="1005" y="399" text-anchor="middle">移动止盈 / 追踪止盈</text></g>
+
+      <path class="edge hot" d="M490 242 C430 278 245 290 185 330"/><path class="edge hot" d="M490 242 C468 282 460 300 455 330"/><path class="edge hot" d="M520 242 C600 280 690 290 725 330"/><path class="edge ok" d="M600 210 C810 260 1000 275 1005 330"/>
+      <text class="lbl" x="252" y="299">主仓派生</text><text class="lbl" x="461" y="297">风险保护</text><text class="lbl" x="650" y="300">获利/降杠杆</text>
+
+      <g class="node neutral"><rect x="60" y="515" width="230" height="104" rx="12"/><text class="title" x="175" y="542" text-anchor="middle">操作树 / 关系图</text><text class="sub" x="175" y="566" text-anchor="middle">主仓 Root</text><text class="sub" x="175" y="584" text-anchor="middle">├ 加仓 A/B/C</text><text class="sub" x="175" y="602" text-anchor="middle">├ 对冲 H1/H2</text></g>
+      <g class="node risk"><rect x="345" y="515" width="230" height="104" rx="12"/><text class="title" x="460" y="542" text-anchor="middle">实时风险引擎</text><text class="sub" x="460" y="566" text-anchor="middle">强平距离 / 保证金</text><text class="sub" x="460" y="584" text-anchor="middle">主仓受加仓/对冲影响</text><text class="small" x="460" y="604" text-anchor="middle">触发红黄绿风险等级</text></g>
+      <g class="node ok"><rect x="630" y="515" width="230" height="104" rx="12"/><text class="title" x="745" y="542" text-anchor="middle">推荐动作引擎</text><text class="sub" x="745" y="566" text-anchor="middle">何时移到成本止损</text><text class="sub" x="745" y="584" text-anchor="middle">何时移动止盈/减仓</text><text class="small" x="745" y="604" text-anchor="middle">基于实时价与节点距离</text></g>
+      <g class="node neutral"><rect x="915" y="515" width="230" height="104" rx="12"/><text class="title" x="1030" y="542" text-anchor="middle">审计与复盘</text><text class="sub" x="1030" y="566" text-anchor="middle">每个动作有依据</text><text class="sub" x="1030" y="584" text-anchor="middle">避免忘记/看不清</text><text class="small" x="1030" y="604" text-anchor="middle">记录、截图、原因、结果</text></g>
+
+      <path class="edge" d="M185 422 C180 458 175 480 175 515"/><path class="edge" d="M455 422 C455 460 460 480 460 515"/><path class="edge" d="M725 422 C735 460 742 480 745 515"/><path class="edge" d="M1005 422 C1015 460 1025 480 1030 515"/>
+      <path class="edge risk" d="M290 567 L345 567"/><path class="edge ok" d="M575 567 L630 567"/><path class="edge" d="M860 567 L915 567"/>
+
+      <g class="node core"><rect x="140" y="710" width="250" height="96" rx="12"/><text class="title" x="265" y="738" text-anchor="middle">主界面推荐呈现</text><text class="sub" x="265" y="762" text-anchor="middle">左：操作树</text><text class="sub" x="265" y="780" text-anchor="middle">中：主仓风险卡</text><text class="sub" x="265" y="798" text-anchor="middle">右：节点明细/建议</text></g>
+      <g class="node risk"><rect x="495" y="710" width="250" height="96" rx="12"/><text class="title" x="620" y="738" text-anchor="middle">风险管理系统</text><text class="sub" x="620" y="762" text-anchor="middle">距离/阈值/冷却/告警</text><text class="sub" x="620" y="780" text-anchor="middle">避免爆仓和误操作</text></g>
+      <g class="node ok"><rect x="850" y="710" width="250" height="96" rx="12"/><text class="title" x="975" y="738" text-anchor="middle">Excel 同步</text><text class="sub" x="975" y="762" text-anchor="middle">报表/备份/人工查看</text><text class="sub" x="975" y="780" text-anchor="middle">核心逻辑仍在 C#</text></g>
+      <path class="edge hot" d="M175 619 C190 660 235 680 265 710"/><path class="edge risk" d="M460 619 C510 660 585 680 620 710"/><path class="edge ok" d="M1030 619 C1030 660 1000 682 975 710"/>
+    </svg>
+  </div>
+
+  <div class="grid section">
+    <div class="card">
+      <h2 style="font-family:var(--serif);font-weight:500;color:var(--slate);margin-bottom:10px">我推荐的软件主界面结构</h2>
+      <ul class="list">
+        <li><span class="tag focus">左侧树</span> 牛熊周期 → 主仓位 → 加仓节点 / 对冲节点 / 减仓节点 / 止盈节点。树上每个节点都显示状态颜色。</li>
+        <li><span class="tag">中间总控</span> 主仓成本、实时价格、强平价、强平距离、账户权益、保证金占用、总浮盈亏。</li>
+        <li><span class="tag">右侧明细</span> 选中某个加仓/对冲节点后，显示成本、手续费、盈亏平衡、成本止损、移动止盈、推荐动作。</li>
+        <li><span class="tag bad">底部风险条</span> 红黄绿风险等级、距离触发价、距离强平价、是否需要减仓/移动止盈。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2 style="font-family:var(--serif);font-weight:500;color:var(--slate);margin-bottom:10px">关键计算对象</h2>
+      <table><thead><tr><th>对象</th><th>必须计算</th></tr></thead><tbody>
+        <tr><td>主仓位</td><td>主仓均价、数量、保证金、强平、浮盈亏、周期方向</td></tr>
+        <tr><td>加仓部分</td><td>加仓成本、双向手续费、盈亏平衡价、成本止损、移动止盈</td></tr>
+        <tr><td>对冲部分</td><td>对冲成本、手续费、盈亏平衡、解锁/平仓条件、对主仓保护效果</td></tr>
+        <tr><td>减仓/止盈</td><td>已实现盈亏、剩余主仓均价变化、风险释放程度</td></tr>
+        <tr><td>风险系统</td><td>强平距离、可承受回撤、保证金压力、节点触发距离</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <div class="card section">
+    <h2 style="font-family:var(--serif);font-weight:500;color:var(--slate);margin-bottom:10px">需要改掉之前 v0.1 框架的地方</h2>
+    <ul class="list">
+      <li><strong>账户模型：</strong>不再是“短线/波段/长线账户”，而是 <span class="pill">Binance U本位长线账户</span><span class="pill">OKX 币本位长线账户</span>。</li>
+      <li><strong>核心对象：</strong>从“交易计划列表”改成“周期主仓位 + 操作节点树”。</li>
+      <li><strong>计划逻辑：</strong>每次加仓/对冲/减仓不是孤立记录，必须挂在某个主仓或父节点下面。</li>
+      <li><strong>风险逻辑：</strong>所有操作都要实时反算对主仓的影响，而不是只展示当前交易所持仓。</li>
+    </ul>
+  </div>
+
+  <div class="card section">
+    <h2 style="font-family:var(--serif);font-weight:500;color:var(--slate);margin-bottom:10px">不足 / 待确认 / 我建议补充</h2>
+    <ul class="list">
+      <li><span class="tag bad">必须确认</span> Binance U本位和 OKX 币本位是否分别独立管理主仓，还是汇总成一个“全局BTC主仓风险”。我建议两层都做：单账户 + 汇总。</li>
+      <li><span class="tag bad">必须确认</span> 加仓和对冲的手续费率、滑点、资金费率是否按交易所实时值估算，还是手动配置固定值。</li>
+      <li><span class="tag focus">建议</span> 每个操作节点必须有唯一编号：主仓 M1，加仓 A1/A2，对冲 H1/H2，止盈 TP1/TP2，避免后续混乱。</li>
+      <li><span class="tag focus">建议</span> 增加“情景模拟”：如果 BTC 跌/涨到某价格，主仓、加仓、对冲、强平距离分别变成多少。</li>
+      <li><span class="tag focus">建议</span> 增加“动作建议不是自动交易”：系统只提示移动止盈/止损/减仓建议，不自动下单，避免误操作。</li>
+      <li><span class="tag">建议</span> Excel 同步只做报表和备份，核心计算在 C#，避免 Excel 公式复杂失控。</li>
+    </ul>
+    <div class="note"><strong>下一步：</strong>如果你认可这张图，我会把刚做的 v0.1 管理软件框架推倒重构为这个模型：先做“主仓位树 + 节点明细 + 风险总控”的 v0.2。</div>
+  </div>
+</div>
+</body>
+</html>

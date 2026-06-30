@@ -1,0 +1,7 @@
+{
+  "CollectorLatestPath": "C:\\Users\\xiaozhu\\Desktop\\BTC实时通信系统\\data\\latest_snapshot.json",
+  "DataDir": "",
+  "RefreshSeconds": 3,
+  "DefaultFeeRatePct": 0.05,
+  "MaxSingleRiskPct": 0.35
+}
