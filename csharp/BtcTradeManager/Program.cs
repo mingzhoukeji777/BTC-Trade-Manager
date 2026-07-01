@@ -136,7 +136,7 @@ public sealed class MainForm:Form
     string AccountKey => _account.SelectedIndex==0 ? "BINANCE_UM" : "OKX_COIN";
     public MainForm()
     {
-        Text="BTC交易管理系统 v0.6.6"; Font=new Font("Microsoft YaHei",9); StartPosition=FormStartPosition.CenterScreen; MinimumSize=new Size(1120,680); Size=new Size(1360,820); LoadUi(); BuildUi(); RefreshAll();
+        Text="BTC交易管理系统 v0.6.7"; Font=new Font("Microsoft YaHei",9); StartPosition=FormStartPosition.CenterScreen; MinimumSize=new Size(1120,680); Size=new Size(1360,820); LoadUi(); BuildUi(); RefreshAll();
         _timer.Interval=Math.Max(1,_store.Config.RefreshSeconds)*1000; _timer.Tick+=(_,_)=>RefreshLiveOnly(); _timer.Start(); FormClosing+=(_,_)=>SaveUi(); ResizeEnd+=(_,_)=>SaveUi(); Move+=(_,_)=>SaveUi();
     }
     static DataGridView Grid(){
@@ -196,7 +196,25 @@ public sealed class MainForm:Form
         if(g.Columns.Contains("id")) g.Columns["id"].Visible=false; ApplyGridWidths(g);
         if(g.Columns.Contains("浮动收益")||g.Columns.Contains("盈亏")||g.Columns.Contains("盈亏金额")){ g.CellFormatting-=Grid_CellFormatting; g.CellFormatting+=Grid_CellFormatting; }
     }
-    void ApplyGridWidths(DataGridView g){ var ui=_store.LoadUi(); if(!string.IsNullOrWhiteSpace(g.Name)&&ui.GridWidths.TryGetValue(g.Name,out var map)&&map.Count>0){ foreach(DataGridViewColumn c in g.Columns) if(map.TryGetValue(c.Name,out var w)) c.Width=Math.Max(40,w); } else { try{ g.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells); }catch{} } }
+    void ApplyGridWidths(DataGridView g){
+        try{
+            if(g.Columns.Count==0 || g.IsDisposed) return;
+            var ui=_store.LoadUi();
+            if(!string.IsNullOrWhiteSpace(g.Name)&&ui.GridWidths.TryGetValue(g.Name,out var map)&&map.Count>0){
+                foreach(DataGridViewColumn c in g.Columns){
+                    if(c==null || string.IsNullOrWhiteSpace(c.Name)) continue;
+                    if(map.TryGetValue(c.Name,out var w)){
+                        var safe=Math.Max(45,Math.Min(260,w));
+                        try{ c.Width=safe; }catch{}
+                    }
+                }
+            } else {
+                try{ g.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells); }catch{}
+            }
+        }catch{
+            try{ g.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells); }catch{}
+        }
+    }
     void Grid_DataError(object? sender, DataGridViewDataErrorEventArgs e){ e.ThrowException=false; e.Cancel=true; }
     void Grid_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e){ var g=sender as DataGridView; if(g==null||e.RowIndex<0||e.ColumnIndex<0)return; var col=g.Columns[e.ColumnIndex].Name; if((col=="浮动收益"||col=="盈亏金额") && e.Value!=null && decimal.TryParse(Convert.ToString(e.Value),out var v)){ e.Value=v.ToString("0.########",CultureInfo.InvariantCulture); e.FormattingApplied=true; e.CellStyle.ForeColor=v>=0?Color.Green:Color.Red; e.CellStyle.Font=new Font(g.Font,FontStyle.Bold); } else if(col=="盈亏" && e.Value!=null){ var txt=Convert.ToString(e.Value); e.CellStyle.ForeColor=txt=="亏"?Color.Red:Color.Green; e.CellStyle.Font=new Font(g.Font,FontStyle.Bold); } }
     void LoadTree(){ _tree.BeginUpdate(); _tree.Nodes.Clear(); var mains=_store.Query("SELECT * FROM main_positions WHERE account_key=$a AND status<>'已平仓' ORDER BY id",("$a",AccountKey)); foreach(DataRow m in mains.Rows){ var n=new TreeNode($"{m["code"]} 主仓｜{m["direction"]}｜{m["status"]}"){Tag=new TagInfo("main",Convert.ToInt64(m["id"])),ImageKey=StatusKey(Convert.ToString(m["status"])),SelectedImageKey=StatusKey(Convert.ToString(m["status"]))}; _tree.Nodes.Add(n); var nodes=_store.Query("SELECT * FROM position_nodes WHERE account_key=$a AND main_code=$m AND node_type IN ('加仓','对冲') AND status<>'已平仓' ORDER BY id",("$a",AccountKey),("$m",Convert.ToString(m["code"])!)); foreach(DataRow r in nodes.Rows){ n.Nodes.Add(new TreeNode($"{r["code"]} {r["node_type"]}｜{r["direction"]}｜{r["status"]}｜{Fmt(r["qty"])}"){Tag=new TagInfo("node",Convert.ToInt64(r["id"])),ImageKey=StatusKey(Convert.ToString(r["status"])),SelectedImageKey=StatusKey(Convert.ToString(r["status"]))}); } n.Expand(); } _tree.EndUpdate(); }
