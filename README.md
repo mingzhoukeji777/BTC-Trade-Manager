@@ -1,6 +1,22 @@
 # BTC交易管理系统
 
-当前版本：`v0.6.0 主仓/加仓/对冲统一表格版`
+当前版本：`v0.6.1 DataGridView显示错误修复版`
+
+## v0.6.1 修复
+
+修复 v0.6 表格显示时可能弹出的 DataGridView 默认错误：
+
+```text
+Invalid cast from System.String to System.Drawing.Image
+```
+
+处理方式：
+
+```text
+所有表格统一强制为文本列
+增加 DataGridView.DataError 保护
+浮动收益列单独做颜色格式化，不再触发表格类型转换错误
+```
 
 ## v0.6 修复/新增
 

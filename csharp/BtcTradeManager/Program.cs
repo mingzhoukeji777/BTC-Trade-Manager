@@ -119,10 +119,14 @@ public sealed class MainForm:Form
     string AccountKey => _account.SelectedIndex==0 ? "BINANCE_UM" : "OKX_COIN";
     public MainForm()
     {
-        Text="BTC交易管理系统 v0.6"; Font=new Font("Microsoft YaHei UI",9); StartPosition=FormStartPosition.CenterScreen; MinimumSize=new Size(1120,680); Size=new Size(1360,820); LoadUi(); BuildUi(); RefreshAll();
+        Text="BTC交易管理系统 v0.6.1"; Font=new Font("Microsoft YaHei UI",9); StartPosition=FormStartPosition.CenterScreen; MinimumSize=new Size(1120,680); Size=new Size(1360,820); LoadUi(); BuildUi(); RefreshAll();
         _timer.Interval=Math.Max(1,_store.Config.RefreshSeconds)*1000; _timer.Tick+=(_,_)=>RefreshLiveOnly(); _timer.Start(); FormClosing+=(_,_)=>SaveUi(); ResizeEnd+=(_,_)=>SaveUi(); Move+=(_,_)=>SaveUi();
     }
-    static DataGridView Grid()=>new(){Dock=DockStyle.Fill,ReadOnly=true,AllowUserToAddRows=false,AllowUserToDeleteRows=false,RowHeadersVisible=false,AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill,SelectionMode=DataGridViewSelectionMode.FullRowSelect,MultiSelect=false};
+    static DataGridView Grid(){
+        var g=new DataGridView{Dock=DockStyle.Fill,ReadOnly=true,AllowUserToAddRows=false,AllowUserToDeleteRows=false,RowHeadersVisible=false,AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill,SelectionMode=DataGridViewSelectionMode.FullRowSelect,MultiSelect=false,AutoGenerateColumns=true};
+        g.DataError += (_,e)=>{ e.ThrowException=false; e.Cancel=true; };
+        return g;
+    }
     void LoadUi(){ var ui=_store.LoadUi(); _loadingUi=true; if(ui.X>=0&&ui.Y>=0){StartPosition=FormStartPosition.Manual; Location=new Point(ui.X,ui.Y);} Size=new Size(Math.Max(1120,ui.Width),Math.Max(680,ui.Height)); _loadingUi=false; }
     void SaveUi(){ if(_loadingUi||WindowState!=FormWindowState.Normal)return; _store.SaveUi(new UiSettings{X=Location.X,Y=Location.Y,Width=Width,Height=Height,SelectedTab=_tabs.SelectedIndex}); }
     void BuildUi()
@@ -154,8 +158,20 @@ public sealed class MainForm:Form
         _reduceGrid.DataSource=_store.Query(cols+" AND node_type='减仓' ORDER BY id",("$a",AccountKey)); HideId(_reduceGrid);
     }
     void LoadOrders(){ _orderGrid.DataSource=_store.Query("SELECT id,order_id AS 订单号,trade_id AS 成交号,side AS 方向,action AS 动作,price AS 价格,qty AS 数量,fee AS 手续费,funding AS 资金费,ts AS 时间,match_status AS 匹配状态,raw_note AS 备注 FROM order_mappings WHERE account_key=$a ORDER BY id DESC",("$a",AccountKey)); HideId(_orderGrid); }
-    void HideId(DataGridView g){ if(g.Columns.Contains("id")) g.Columns["id"].Visible=false; if(g.Columns.Contains("浮动收益")){ g.CellFormatting-=Grid_CellFormatting; g.CellFormatting+=Grid_CellFormatting; } }
-    void Grid_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e){ var g=sender as DataGridView; if(g?.Columns[e.ColumnIndex].Name=="浮动收益" && e.Value!=null && decimal.TryParse(Convert.ToString(e.Value),out var v)){ e.CellStyle.ForeColor=v>=0?Color.Green:Color.Red; e.CellStyle.Font=new Font(g.Font,FontStyle.Bold); } }
+    void HideId(DataGridView g){
+        g.DataError -= Grid_DataError; g.DataError += Grid_DataError;
+        for(int i=0;i<g.Columns.Count;i++){
+            if(g.Columns[i] is DataGridViewImageColumn img){
+                var txt=new DataGridViewTextBoxColumn{ Name=img.Name, HeaderText=img.HeaderText, DataPropertyName=img.DataPropertyName, Visible=img.Visible, FillWeight=img.FillWeight, AutoSizeMode=img.AutoSizeMode};
+                g.Columns.RemoveAt(i); g.Columns.Insert(i,txt);
+            }
+            g.Columns[i].ValueType=typeof(string);
+        }
+        if(g.Columns.Contains("id")) g.Columns["id"].Visible=false;
+        if(g.Columns.Contains("浮动收益")){ g.CellFormatting-=Grid_CellFormatting; g.CellFormatting+=Grid_CellFormatting; }
+    }
+    void Grid_DataError(object? sender, DataGridViewDataErrorEventArgs e){ e.ThrowException=false; e.Cancel=true; }
+    void Grid_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e){ var g=sender as DataGridView; if(g==null||e.RowIndex<0||e.ColumnIndex<0)return; if(g.Columns[e.ColumnIndex].Name=="浮动收益" && e.Value!=null && decimal.TryParse(Convert.ToString(e.Value),out var v)){ e.Value=v.ToString("0.########",CultureInfo.InvariantCulture); e.FormattingApplied=true; e.CellStyle.ForeColor=v>=0?Color.Green:Color.Red; e.CellStyle.Font=new Font(g.Font,FontStyle.Bold); } }
     void LoadTree(){ _tree.BeginUpdate(); _tree.Nodes.Clear(); var mains=_store.Query("SELECT * FROM main_positions WHERE account_key=$a ORDER BY id",("$a",AccountKey)); foreach(DataRow m in mains.Rows){ var n=new TreeNode($"{m["code"]} 主仓｜{m["direction"]}｜{m["status"]}"){Tag=new TagInfo("main",Convert.ToInt64(m["id"]))}; _tree.Nodes.Add(n); var nodes=_store.Query("SELECT * FROM position_nodes WHERE account_key=$a AND main_code=$m AND node_type IN ('加仓','对冲') AND status<>'已平仓' ORDER BY id",("$a",AccountKey),("$m",Convert.ToString(m["code"])!)); foreach(DataRow r in nodes.Rows){ n.Nodes.Add(new TreeNode($"{r["code"]} {r["node_type"]}｜{r["direction"]}｜{r["status"]}｜{Fmt(r["qty"])}"){Tag=new TagInfo("node",Convert.ToInt64(r["id"]))}); } n.Expand(); } _tree.EndUpdate(); }
     void LoadRisk(){ var root=_store.LoadLatest(out _); var s=FindSnap(root); var dt=new DataTable(); foreach(var c in new[]{"项目","结果","说明"})dt.Columns.Add(c); dt.Rows.Add("账户",_account.Text,"Binance/OKX独立主仓"); dt.Rows.Add("采集状态",s?.Status??"无数据",s?.LastSuccess??""); dt.Rows.Add("实时价格",FmtStr(s?.Price,1),"latest_snapshot"); dt.Rows.Add("持仓",Pos(s?.Position),"交易所真实持仓"); dt.Rows.Add("强平距离",LiqDistance(s),"标记价到强平价"); dt.Rows.Add("节点数量",_store.Scalar("SELECT COUNT(*) FROM position_nodes WHERE account_key=$a",("$a",AccountKey))?.ToString()??"0","A/H/TP/SL/R"); dt.Rows.Add("待归类订单",_store.Scalar("SELECT COUNT(*) FROM order_mappings WHERE account_key=$a AND match_status='待归类'",("$a",AccountKey))?.ToString()??"0","需要手动处理"); _riskGrid.DataSource=dt; }
     void LoadScenario(){ _scenarioGrid.DataSource=_store.Query("SELECT id,target_price AS 目标价,created_at AS 时间,result_json AS 结果 FROM scenario_runs WHERE account_key=$a ORDER BY id DESC",("$a",AccountKey)); HideId(_scenarioGrid); }
