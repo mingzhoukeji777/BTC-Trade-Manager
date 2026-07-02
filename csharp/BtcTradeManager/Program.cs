@@ -132,38 +132,38 @@ public sealed class MainForm:Form
 {
     readonly Store _store = new(); readonly ComboBox _account = new(){DropDownStyle=ComboBoxStyle.DropDownList,Width=230}; readonly TabControl _tabs = new(){Dock=DockStyle.Fill}; readonly Label _status = new(){Dock=DockStyle.Bottom,Height=28,TextAlign=ContentAlignment.MiddleLeft}; readonly System.Windows.Forms.Timer _timer = new();
     readonly DataGridView _summary = Grid(); readonly TreeView _tree = new(){Dock=DockStyle.Fill,HideSelection=false,Font=new Font("Microsoft YaHei",10)};
-    readonly DataGridView _mainGrid=Grid(), _nodeGrid=Grid(), _addGrid=Grid(), _hedgeGrid=Grid(), _reduceGrid=Grid(), _closedGrid=Grid(), _orderGrid=Grid(), _riskGrid=Grid(), _scenarioGrid=Grid(); bool _loadingUi;
+    readonly DataGridView _mainGrid=Grid(), _nodeGrid=Grid(), _addGrid=Grid(), _hedgeGrid=Grid(), _reduceGrid=Grid(), _closedGrid=Grid(), _orderGrid=Grid(), _riskGrid=Grid(), _scenarioGrid=Grid(); bool _loadingUi; bool _applyingLayout;
     string AccountKey => _account.SelectedIndex==0 ? "BINANCE_UM" : "OKX_COIN";
     public MainForm()
     {
-        Text="BTC交易管理系统 v0.7.1"; Font=new Font("Microsoft YaHei",9); StartPosition=FormStartPosition.CenterScreen; MinimumSize=new Size(1120,680); Size=new Size(1360,820); LoadUi(); BuildUi(); RefreshAll();
+        Text="BTC交易管理系统 v0.7.2"; Font=new Font("Microsoft YaHei",9); StartPosition=FormStartPosition.CenterScreen; MinimumSize=new Size(1120,680); Size=new Size(1360,820); LoadUi(); BuildUi(); RefreshAll();
         _timer.Interval=Math.Max(1,_store.Config.RefreshSeconds)*1000; _timer.Tick+=(_,_)=>RefreshLiveOnly(); _timer.Start(); FormClosing+=(_,_)=>SaveUi(); ResizeEnd+=(_,_)=>SaveUi(); Move+=(_,_)=>SaveUi();
     }
     static DataGridView Grid(){
-        var g=new DataGridView{Dock=DockStyle.Fill,Font=new Font("Microsoft YaHei",9),DefaultCellStyle=new DataGridViewCellStyle{Font=new Font("Microsoft YaHei",9),Alignment=DataGridViewContentAlignment.MiddleCenter},ColumnHeadersDefaultCellStyle=new DataGridViewCellStyle{Font=new Font("Microsoft YaHei",9,FontStyle.Bold),Alignment=DataGridViewContentAlignment.MiddleCenter},ReadOnly=true,AllowUserToAddRows=false,AllowUserToDeleteRows=false,RowHeadersVisible=false,AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.None,SelectionMode=DataGridViewSelectionMode.FullRowSelect,MultiSelect=false,AutoGenerateColumns=true,BackgroundColor=Color.White,GridColor=Color.LightGray};
-        g.DefaultCellStyle.SelectionBackColor=Color.FromArgb(255,245,180); g.DefaultCellStyle.SelectionForeColor=Color.Black; g.RowTemplate.DefaultCellStyle.SelectionBackColor=Color.FromArgb(255,245,180); g.RowTemplate.DefaultCellStyle.SelectionForeColor=Color.Black; g.DataError += (_,e)=>{ e.ThrowException=false; e.Cancel=true; };
-        g.ColumnDividerDoubleClick += (sender,e)=>{ var dg=(DataGridView)sender!; if(e.ColumnIndex>=0){ var col=dg.Columns[e.ColumnIndex]; var w=TextRenderer.MeasureText(col.HeaderText??col.Name,dg.ColumnHeadersDefaultCellStyle.Font??dg.Font).Width+28; col.Width=Math.Max(48,Math.Min(220,w)); col.DefaultCellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; col.HeaderCell.Style.Alignment=DataGridViewContentAlignment.MiddleCenter; foreach(DataGridViewRow row in dg.Rows){ try{ row.Cells[e.ColumnIndex].Style.Alignment=DataGridViewContentAlignment.MiddleCenter; }catch{} } } }; g.MouseClick += (sender,e)=>{ var dg=(DataGridView)sender!; var hit=dg.HitTest(e.X,e.Y); if(hit.Type==DataGridViewHitTestType.None || hit.RowIndex<0){ try{ dg.ClearSelection(); dg.CurrentCell=null; }catch{} } };
+        var g=new DataGridView{Dock=DockStyle.Fill,Font=new Font("Microsoft YaHei",11),DefaultCellStyle=new DataGridViewCellStyle{Font=new Font("Microsoft YaHei",11),Alignment=DataGridViewContentAlignment.MiddleCenter},ColumnHeadersDefaultCellStyle=new DataGridViewCellStyle{Font=new Font("Microsoft YaHei",11,FontStyle.Bold),Alignment=DataGridViewContentAlignment.MiddleCenter,WrapMode=DataGridViewTriState.False},ReadOnly=true,AllowUserToAddRows=false,AllowUserToDeleteRows=false,RowHeadersVisible=false,AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.None,SelectionMode=DataGridViewSelectionMode.FullRowSelect,MultiSelect=false,AutoGenerateColumns=true,BackgroundColor=Color.White,GridColor=Color.LightGray,EnableHeadersVisualStyles=false,ColumnHeadersHeight=36,ColumnHeadersHeightSizeMode=DataGridViewColumnHeadersHeightSizeMode.DisableResizing};
+        g.RowTemplate.Height=34; g.DefaultCellStyle.SelectionBackColor=Color.FromArgb(255,245,180); g.DefaultCellStyle.SelectionForeColor=Color.Black; g.RowTemplate.DefaultCellStyle.SelectionBackColor=Color.FromArgb(255,245,180); g.RowTemplate.DefaultCellStyle.SelectionForeColor=Color.Black; g.DataError += (_,e)=>{ e.ThrowException=false; e.Cancel=true; };
+        g.ColumnDividerDoubleClick += (sender,e)=>{ var dg=(DataGridView)sender!; if(e.ColumnIndex>=0){ var col=dg.Columns[e.ColumnIndex]; var w=TextRenderer.MeasureText(col.HeaderText??col.Name,dg.ColumnHeadersDefaultCellStyle.Font??dg.Font).Width+28; col.Width=Math.Max(48,Math.Min(220,w)); col.DefaultCellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; col.HeaderCell.Style.Alignment=DataGridViewContentAlignment.MiddleCenter; foreach(DataGridViewRow row in dg.Rows){ try{ row.Cells[e.ColumnIndex].Style.Alignment=DataGridViewContentAlignment.MiddleCenter; }catch{} } try{ if(dg.FindForm() is MainForm mf) mf.SaveUi(); }catch{} } }; g.MouseClick += (sender,e)=>{ var dg=(DataGridView)sender!; var hit=dg.HitTest(e.X,e.Y); if(hit.Type==DataGridViewHitTestType.None || hit.RowIndex<0){ try{ dg.ClearSelection(); dg.CurrentCell=null; }catch{} } };
         return g;
     }
     void LoadUi(){ var ui=_store.LoadUi(); _loadingUi=true; if(ui.X>=0&&ui.Y>=0){StartPosition=FormStartPosition.Manual; Location=new Point(ui.X,ui.Y);} Size=new Size(Math.Max(1120,ui.Width),Math.Max(680,ui.Height)); _loadingUi=false; }
     void SaveUi(){ if(_loadingUi||WindowState!=FormWindowState.Normal)return; var ui=new UiSettings{X=Location.X,Y=Location.Y,Width=Width,Height=Height,SelectedTab=_tabs.SelectedIndex}; foreach(var g in new[]{_summary,_mainGrid,_addGrid,_hedgeGrid,_reduceGrid,_closedGrid,_orderGrid,_riskGrid,_scenarioGrid}){ if(string.IsNullOrWhiteSpace(g.Name))continue; ui.GridWidths[g.Name]=g.Columns.Cast<DataGridViewColumn>().Where(c=>c.Visible).ToDictionary(c=>c.Name,c=>c.Width); } _store.SaveUi(ui); }
     void BuildUi()
     {
-        var root=new TableLayoutPanel{Dock=DockStyle.Fill,RowCount=2,ColumnCount=1}; root.RowStyles.Add(new RowStyle(SizeType.Absolute,50)); root.RowStyles.Add(new RowStyle(SizeType.Percent,100)); Controls.Add(root); Controls.Add(_status); NameGrids(); _tree.ImageList=BuildStatusImages(); _tree.DrawMode=TreeViewDrawMode.OwnerDrawText; _tree.DrawNode+=DrawTreeNode; _tabs.DrawMode=TabDrawMode.OwnerDrawFixed; _tabs.Padding=new Point(18,4); _tabs.DrawItem+=DrawTab; _tabs.SelectedIndexChanged+=(_,_)=>{ if(_tabs.SelectedTab?.Text=="总控") ApplySummaryLayout(); }; _summary.SizeChanged+=(_,_)=>ApplySummaryLayout();
+        var root=new TableLayoutPanel{Dock=DockStyle.Fill,RowCount=2,ColumnCount=1}; root.RowStyles.Add(new RowStyle(SizeType.Absolute,50)); root.RowStyles.Add(new RowStyle(SizeType.Percent,100)); Controls.Add(root); Controls.Add(_status); NameGrids(); _tree.ImageList=BuildStatusImages(); _tree.DrawMode=TreeViewDrawMode.OwnerDrawText; _tree.DrawNode+=DrawTreeNode; _tabs.DrawMode=TabDrawMode.OwnerDrawFixed; _tabs.Padding=new Point(18,4); _tabs.DrawItem+=DrawTab; _tabs.SelectedIndexChanged+=(_,_)=>{};
         var top=new FlowLayoutPanel{Dock=DockStyle.Fill,Padding=new Padding(10,8,10,6),WrapContents=false}; root.Controls.Add(top,0,0); top.Controls.Add(new Label{Text="当前主仓：",AutoSize=true,Margin=new Padding(0,7,4,0)}); _account.Items.AddRange(new object[]{"Binance U本位主仓","OKX 币本位主仓"}); _account.SelectedIndex=1; _account.SelectedIndexChanged+=(_,_)=>RefreshAll(); top.Controls.Add(_account);
         AddButton(top,"刷新",RefreshAll); AddButton(top,"新增主仓",()=>EditMain(null)); AddButton(top,"加仓",()=>EditNodePreset("加仓")); AddButton(top,"对冲",()=>EditNodePreset("对冲")); AddButton(top,"归类订单",()=>EditOrder(null)); AddButton(top,"情景模拟",RunScenario); AddButton(top,"设置",OpenSettings);
         root.Controls.Add(_tabs,0,1);
         _tabs.TabPages.Add(Page("总控", _summary)); _tabs.TabPages.Add(Page("主仓M", WithMenu(_mainGrid, MainMenu()))); _tabs.TabPages.Add(Page("主仓树", WithMenu(_tree, TreeMenu()))); _tabs.TabPages.Add(Page("加仓A", WithMenu(_addGrid, NodeMenu()))); _tabs.TabPages.Add(Page("对冲H", WithMenu(_hedgeGrid, NodeMenu()))); _tabs.TabPages.Add(Page("减仓R", WithMenu(_reduceGrid, NodeMenu()))); _tabs.TabPages.Add(Page("已平仓", WithMenu(_closedGrid, NodeMenu()))); _tabs.TabPages.Add(Page("订单映射/待归类", WithMenu(_orderGrid, OrderMenu()))); _tabs.TabPages.Add(Page("风险总控", _riskGrid)); _tabs.TabPages.Add(Page("情景模拟", _scenarioGrid));
-        _mainGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditMain(RowId(_mainGrid)); }; _nodeGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditNode(RowId(_nodeGrid)); }; _addGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditNode(RowId(_addGrid)); }; _hedgeGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditNode(RowId(_hedgeGrid)); }; _reduceGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditNode(RowId(_reduceGrid)); }; _closedGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditClosed(RowId(_closedGrid)); }; _orderGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditOrder(RowId(_orderGrid)); };
+        _mainGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditMain(RowId(_mainGrid)); }; _nodeGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditNode(RowId(_nodeGrid)); }; _addGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditNode(RowId(_addGrid)); }; _hedgeGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditNode(RowId(_hedgeGrid)); }; _reduceGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditNode(RowId(_reduceGrid)); }; _closedGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditClosed(RowId(_closedGrid)); }; _orderGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditOrder(RowId(_orderGrid)); }; foreach(var dg in new[]{_summary,_mainGrid,_addGrid,_hedgeGrid,_reduceGrid,_closedGrid,_orderGrid,_riskGrid,_scenarioGrid}) dg.ColumnWidthChanged+=(_,_)=>{ if(!_loadingUi && !_applyingLayout) SaveUi(); };
     }
-    void NameGrids(){ _summary.Name="总控"; _summary.Font=new Font("Microsoft YaHei",16,FontStyle.Bold); _summary.DefaultCellStyle.Font=new Font("Microsoft YaHei",16,FontStyle.Bold); _summary.ColumnHeadersDefaultCellStyle.Font=new Font("Microsoft YaHei",14,FontStyle.Bold); _summary.RowTemplate.Height=56; _summary.DefaultCellStyle.WrapMode=DataGridViewTriState.True; _summary.AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill; _summary.BackgroundColor=Color.White; _mainGrid.Name="主仓M"; _addGrid.Name="加仓A"; _hedgeGrid.Name="对冲H"; _reduceGrid.Name="减仓R"; _closedGrid.Name="已平仓"; _orderGrid.Name="订单"; _riskGrid.Name="风险"; _scenarioGrid.Name="情景"; }
+    void NameGrids(){ _summary.Name="总控"; _summary.Font=new Font("Microsoft YaHei",20,FontStyle.Bold); _summary.DefaultCellStyle.Font=new Font("Microsoft YaHei",20,FontStyle.Bold); _summary.ColumnHeadersDefaultCellStyle.Font=new Font("Microsoft YaHei",15,FontStyle.Bold); _summary.RowTemplate.Height=66; _summary.RowTemplate.DefaultCellStyle.Font=new Font("Microsoft YaHei",20,FontStyle.Bold); _summary.DefaultCellStyle.WrapMode=DataGridViewTriState.True; _summary.AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill; _summary.BackgroundColor=Color.White; _mainGrid.Name="主仓M"; _addGrid.Name="加仓A"; _hedgeGrid.Name="对冲H"; _reduceGrid.Name="减仓R"; _closedGrid.Name="已平仓"; _orderGrid.Name="订单"; _riskGrid.Name="风险"; _scenarioGrid.Name="情景"; }
     ImageList BuildStatusImages(){ var il=new ImageList{ImageSize=new Size(16,16),ColorDepth=ColorDepth.Depth32Bit}; il.Images.Add("red",Circle(Color.Red)); il.Images.Add("yellow",Circle(Color.Gold)); il.Images.Add("green",Circle(Color.LimeGreen)); il.Images.Add("gray",Circle(Color.Gray)); return il; }
     Bitmap Circle(Color c){ var bmp=new Bitmap(16,16); using var g=Graphics.FromImage(bmp); g.SmoothingMode=System.Drawing.Drawing2D.SmoothingMode.AntiAlias; using var b=new SolidBrush(c); using var p=new Pen(Color.Black,1); g.FillEllipse(b,2,2,12,12); g.DrawEllipse(p,2,2,12,12); return bmp; }
     string StatusKey(string? s)=>(s=="持有中"||s=="持仓中")?"red":s=="成本止损"?"yellow":s=="移动止盈"?"green":"gray";
     void DrawTreeNode(object? sender, DrawTreeNodeEventArgs e){ var selected=(e.State&TreeNodeStates.Selected)!=0; var bounds=new Rectangle(e.Bounds.X,e.Bounds.Y,Math.Max(e.Bounds.Width,260),e.Bounds.Height); using var bg=new SolidBrush(selected?Color.FromArgb(255,245,180):_tree.BackColor); e.Graphics.FillRectangle(bg,bounds); TextRenderer.DrawText(e.Graphics,e.Node?.Text??"",_tree.Font,bounds,Color.Black,TextFormatFlags.VerticalCenter|TextFormatFlags.Left); if(selected) using(var pen=new Pen(Color.FromArgb(180,120,0),1)){ e.Graphics.DrawRectangle(pen,bounds.X,bounds.Y,bounds.Width-1,bounds.Height-1); } }
     static TabPage Page(string n, Control c){ var p=new TabPage(n); p.Controls.Add(c); return p; }
     void AddButton(FlowLayoutPanel p,string text,Action a){ var b=new Button{Text=text,Height=30,AutoSize=true,MinimumSize=new Size(82,30),Margin=new Padding(8,1,0,0)}; b.Click+=(_,_)=>a(); p.Controls.Add(b); }
-    void DrawTab(object? sender, DrawItemEventArgs e){ var tab=_tabs.TabPages[e.Index]; var r=e.Bounds; using var back=new SolidBrush(e.State.HasFlag(DrawItemState.Selected)?Color.White:Color.FromArgb(238,238,238)); e.Graphics.FillRectangle(back,r); e.Graphics.DrawRectangle(Pens.Gray,r.X,r.Y,r.Width-1,r.Height-1); TextRenderer.DrawText(e.Graphics,tab.Text,Font,r,Color.Black,TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter); }
+    void DrawTab(object? sender, DrawItemEventArgs e){ var tab=_tabs.TabPages[e.Index]; var r=e.Bounds; using var back=new SolidBrush(e.State.HasFlag(DrawItemState.Selected)?Color.White:Color.FromArgb(238,238,238)); e.Graphics.FillRectangle(back,r); e.Graphics.DrawRectangle(Pens.Gray,r.X,r.Y,r.Width-1,r.Height-1); using var tf=new Font("Microsoft YaHei",10,FontStyle.Bold); TextRenderer.DrawText(e.Graphics,tab.Text,tf,r,Color.Black,TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter); }
     Control WithMenu(Control c, ContextMenuStrip m){ c.ContextMenuStrip=m; return c; }
     ContextMenuStrip MainMenu(){ var m=new ContextMenuStrip(); m.Items.Add("修改",null,(_,_)=>EditMain(RowId(_mainGrid))); m.Items.Add("删除",null,(_,_)=>DeleteMain()); m.Items.Add("移动止盈",null,(_,_)=>SetMainProtection("移动止盈")); m.Items.Add("成本止损",null,(_,_)=>SetMainProtection("成本止损")); m.Items.Add("平仓",null,(_,_)=>CloseMain()); m.Items.Add("减仓",null,(_,_)=>ReduceMain()); return m; }
     ContextMenuStrip NodeMenu(){ var m=new ContextMenuStrip(); m.Items.Add("修改",null,(_,_)=>EditCurrentOrClosed()); m.Items.Add("删除",null,(_,_)=>DeleteNode()); m.Items.Add("移动止盈",null,(_,_)=>SetProtection("移动止盈")); m.Items.Add("成本止损",null,(_,_)=>SetProtection("成本止损")); m.Items.Add("平仓",null,(_,_)=>CloseNode()); m.Items.Add("减仓",null,(_,_)=>ReduceCurrentNode()); return m; }
@@ -193,43 +193,58 @@ public sealed class MainForm:Form
             }
             g.Columns[i].ValueType=typeof(string);
         }
-        if(g.Columns.Contains("id")) g.Columns["id"].Visible=false; foreach(DataGridViewColumn c in g.Columns){ c.DefaultCellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; c.HeaderCell.Style.Alignment=DataGridViewContentAlignment.MiddleCenter; } if(!ReferenceEquals(g,_summary)) ApplyGridWidths(g); else ApplySummaryLayout();
+        if(g.Columns.Contains("id")) g.Columns["id"].Visible=false; g.EnableHeadersVisualStyles=false; g.ColumnHeadersDefaultCellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; g.DefaultCellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; foreach(DataGridViewColumn c in g.Columns){ c.DefaultCellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; c.HeaderCell.Style.Alignment=DataGridViewContentAlignment.MiddleCenter; c.HeaderCell.Style.Font=g.ColumnHeadersDefaultCellStyle.Font; } if(!ReferenceEquals(g,_summary)) ApplyGridWidths(g); else ApplySummaryLayout();
         if(g.Columns.Contains("浮动收益")||g.Columns.Contains("盈亏")||g.Columns.Contains("盈亏金额")){ g.CellFormatting-=Grid_CellFormatting; g.CellFormatting+=Grid_CellFormatting; } try{ g.ClearSelection(); g.CurrentCell=null; }catch{}
     }
     void ApplySummaryLayout(){
         try{
+            _applyingLayout=true;
             _summary.AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.None;
-            foreach(DataGridViewColumn c in _summary.Columns){ c.DefaultCellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; c.HeaderCell.Style.Alignment=DataGridViewContentAlignment.MiddleCenter; }
-            var total=Math.Max(760,_summary.ClientSize.Width-24);
-            if(_summary.Columns.Contains("项目")) _summary.Columns["项目"].Width=Math.Max(180,(int)(total*0.22));
-            if(_summary.Columns.Contains("数值")) _summary.Columns["数值"].Width=Math.Max(260,(int)(total*0.30));
-            if(_summary.Columns.Contains("说明")) _summary.Columns["说明"].Width=Math.Max(360,total-(_summary.Columns.Contains("项目")?_summary.Columns["项目"].Width:0)-(_summary.Columns.Contains("数值")?_summary.Columns["数值"].Width:0));
+            _summary.EnableHeadersVisualStyles=false;
+            foreach(DataGridViewColumn c in _summary.Columns){
+                c.DefaultCellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter;
+                c.HeaderCell.Style.Alignment=DataGridViewContentAlignment.MiddleCenter;
+                c.HeaderCell.Style.Font=_summary.ColumnHeadersDefaultCellStyle.Font;
+            }
+            var ui=_store.LoadUi();
+            if(ui.GridWidths.TryGetValue(_summary.Name,out var map) && map.Count>0){
+                foreach(DataGridViewColumn c in _summary.Columns){ if(map.TryGetValue(c.Name,out var w)) try{ c.Width=Math.Max(70,Math.Min(1200,w)); }catch{} }
+            }else{
+                var total=Math.Max(900,_summary.ClientSize.Width-24);
+                if(_summary.Columns.Contains("项目")) _summary.Columns["项目"].Width=Math.Max(220,(int)(total*0.22));
+                if(_summary.Columns.Contains("数值")) _summary.Columns["数值"].Width=Math.Max(340,(int)(total*0.30));
+                if(_summary.Columns.Contains("说明")) _summary.Columns["说明"].Width=Math.Max(460,total-(_summary.Columns.Contains("项目")?_summary.Columns["项目"].Width:0)-(_summary.Columns.Contains("数值")?_summary.Columns["数值"].Width:0));
+            }
             _summary.DefaultCellStyle.WrapMode=DataGridViewTriState.True;
             _summary.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
-            foreach(DataGridViewRow r in _summary.Rows) if(r.Height<56) r.Height=56;
-        }catch{}
+            foreach(DataGridViewRow r in _summary.Rows) if(r.Height<66) r.Height=66;
+        }catch{} finally{ _applyingLayout=false; }
     }
     void ApplyGridWidths(DataGridView g){
         try{
             if(g.Columns.Count==0 || g.IsDisposed) return;
+            _applyingLayout=true;
+            g.AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.None;
+            g.EnableHeadersVisualStyles=false;
             var ui=_store.LoadUi();
-            if(!string.IsNullOrWhiteSpace(g.Name)&&ui.GridWidths.TryGetValue(g.Name,out var map)&&map.Count>0){
-                foreach(DataGridViewColumn c in g.Columns){
-                    if(c==null || string.IsNullOrWhiteSpace(c.Name)) continue;
-                    if(map.TryGetValue(c.Name,out var w)){
-                        var safe=Math.Max(45,Math.Min(260,w));
-                        try{ c.Width=safe; }catch{}
-                    }
+            Dictionary<string,int>? map=null;
+            var hasMap=!string.IsNullOrWhiteSpace(g.Name)&&ui.GridWidths.TryGetValue(g.Name,out map)&&map.Count>0;
+            foreach(DataGridViewColumn c in g.Columns){
+                if(c==null || string.IsNullOrWhiteSpace(c.Name)) continue;
+                c.DefaultCellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter;
+                c.HeaderCell.Style.Alignment=DataGridViewContentAlignment.MiddleCenter;
+                c.HeaderCell.Style.Font=g.ColumnHeadersDefaultCellStyle.Font;
+                if(hasMap && map!=null && map.TryGetValue(c.Name,out var w)){
+                    try{ c.Width=Math.Max(45,Math.Min(1200,w)); }catch{}
+                }else{
+                    var basis=TextRenderer.MeasureText(c.HeaderText??c.Name, g.ColumnHeadersDefaultCellStyle.Font??g.Font).Width+30;
+                    try{ c.Width=Math.Max(56,Math.Min(260,basis)); }catch{}
                 }
-            } else {
-                try{ g.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells); }catch{}
             }
-        }catch{
-            try{ g.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells); }catch{}
-        }
+        }catch{} finally{ _applyingLayout=false; }
     }
     void Grid_DataError(object? sender, DataGridViewDataErrorEventArgs e){ e.ThrowException=false; e.Cancel=true; }
-    void Grid_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e){ var g=sender as DataGridView; if(g==null||e.RowIndex<0||e.ColumnIndex<0)return; var col=g.Columns[e.ColumnIndex].Name; if((col=="浮动收益"||col=="盈亏金额") && e.Value!=null && decimal.TryParse(Convert.ToString(e.Value),out var v)){ e.Value=v.ToString("0.########",CultureInfo.InvariantCulture); e.FormattingApplied=true; e.CellStyle.ForeColor=v>=0?Color.Green:Color.Red; e.CellStyle.Font=new Font(g.Font,FontStyle.Bold); } else if(col=="盈亏" && e.Value!=null){ var txt=Convert.ToString(e.Value); e.CellStyle.ForeColor=txt=="亏"?Color.Red:Color.Green; e.CellStyle.Font=new Font(g.Font,FontStyle.Bold); } }
+    void Grid_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e){ var g=sender as DataGridView; if(g==null||e.RowIndex<0||e.ColumnIndex<0)return; var col=g.Columns[e.ColumnIndex].Name; if((col=="浮动收益"||col=="盈亏金额") && e.Value!=null && decimal.TryParse(Convert.ToString(e.Value),out var v)){ e.Value=v.ToString("0.########",CultureInfo.InvariantCulture); e.FormattingApplied=true; e.CellStyle.ForeColor=v>=0?Color.Green:Color.Red; e.CellStyle.Font=new Font(g.Font,FontStyle.Bold); e.CellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; } else if(col=="盈亏" && e.Value!=null){ var txt=Convert.ToString(e.Value); e.CellStyle.ForeColor=txt=="亏"?Color.Red:Color.Green; e.CellStyle.Font=new Font(g.Font,FontStyle.Bold); e.CellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; } }
     void LoadTree(){ _tree.BeginUpdate(); _tree.Nodes.Clear(); var mains=_store.Query("SELECT * FROM main_positions WHERE account_key=$a AND status<>'已平仓' ORDER BY id",("$a",AccountKey)); foreach(DataRow m in mains.Rows){ var n=new TreeNode($"{m["code"]} 主仓｜{m["direction"]}｜{m["status"]}"){Tag=new TagInfo("main",Convert.ToInt64(m["id"])),ImageKey=StatusKey(Convert.ToString(m["status"])),SelectedImageKey=StatusKey(Convert.ToString(m["status"]))}; _tree.Nodes.Add(n); var nodes=_store.Query("SELECT * FROM position_nodes WHERE account_key=$a AND main_code=$m AND node_type IN ('加仓','对冲') AND status<>'已平仓' ORDER BY id",("$a",AccountKey),("$m",Convert.ToString(m["code"])!)); foreach(DataRow r in nodes.Rows){ n.Nodes.Add(new TreeNode($"{r["code"]} {r["node_type"]}｜{r["direction"]}｜{r["status"]}｜{Fmt(r["qty"])}"){Tag=new TagInfo("node",Convert.ToInt64(r["id"])),ImageKey=StatusKey(Convert.ToString(r["status"])),SelectedImageKey=StatusKey(Convert.ToString(r["status"]))}); } n.Expand(); } _tree.EndUpdate(); }
     void LoadRisk(){ var root=_store.LoadLatest(out _); var s=FindSnap(root); var dt=new DataTable(); foreach(var c in new[]{"项目","结果","说明"})dt.Columns.Add(c); dt.Rows.Add("账户",_account.Text,"Binance/OKX独立主仓"); dt.Rows.Add("采集状态",s?.Status??"无数据",s?.LastSuccess??""); dt.Rows.Add("实时价格",FmtStr(s?.Price,1),"latest_snapshot"); dt.Rows.Add("持仓",Pos(s?.Position),"交易所真实持仓"); dt.Rows.Add("强平距离",LiqDistance(s),"标记价到强平价"); dt.Rows.Add("节点数量",_store.Scalar("SELECT COUNT(*) FROM position_nodes WHERE account_key=$a",("$a",AccountKey))?.ToString()??"0","A/H/TP/SL/R"); dt.Rows.Add("待归类订单",_store.Scalar("SELECT COUNT(*) FROM order_mappings WHERE account_key=$a AND match_status='待归类'",("$a",AccountKey))?.ToString()??"0","需要手动处理"); _riskGrid.DataSource=dt; HideId(_riskGrid); }
     void LoadScenario(){ _scenarioGrid.DataSource=_store.Query("SELECT id,target_price AS 目标价,created_at AS 时间,result_json AS 结果 FROM scenario_runs WHERE account_key=$a ORDER BY id DESC",("$a",AccountKey)); HideId(_scenarioGrid); }
