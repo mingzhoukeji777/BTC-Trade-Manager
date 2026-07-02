@@ -136,7 +136,7 @@ public sealed class MainForm:Form
     string AccountKey => _account.SelectedIndex==0 ? "BINANCE_UM" : "OKX_COIN";
     public MainForm()
     {
-        Text="BTC交易管理系统 v0.7.4"; Font=new Font("Microsoft YaHei",9); StartPosition=FormStartPosition.CenterScreen; MinimumSize=new Size(1120,680); Size=new Size(1360,820); LoadUi(); BuildUi(); RefreshAll();
+        Text="BTC交易管理系统 v0.7.5"; Font=new Font("Microsoft YaHei",9); StartPosition=FormStartPosition.CenterScreen; MinimumSize=new Size(1120,680); Size=new Size(1360,820); LoadUi(); BuildUi(); RefreshAll();
         _timer.Interval=Math.Max(1,_store.Config.RefreshSeconds)*1000; _timer.Tick+=(_,_)=>RefreshLiveOnly(); _timer.Start(); FormClosing+=(_,_)=>SaveUi(); ResizeEnd+=(_,_)=>SaveUi(); Move+=(_,_)=>SaveUi();
     }
     static DataGridView Grid(){
@@ -167,7 +167,7 @@ public sealed class MainForm:Form
     Control WithMenu(Control c, ContextMenuStrip m){ c.ContextMenuStrip=m; return c; }
     ContextMenuStrip MainMenu(){ var m=new ContextMenuStrip(); m.Items.Add("修改",null,(_,_)=>EditMain(RowId(_mainGrid))); m.Items.Add("删除",null,(_,_)=>DeleteMain()); m.Items.Add("移动止盈",null,(_,_)=>SetMainProtection("移动止盈")); m.Items.Add("成本止损",null,(_,_)=>SetMainProtection("成本止损")); m.Items.Add("平仓",null,(_,_)=>CloseMain()); m.Items.Add("减仓",null,(_,_)=>ReduceMain()); return m; }
     ContextMenuStrip NodeMenu(){ var m=new ContextMenuStrip(); m.Items.Add("修改",null,(_,_)=>EditCurrentOrClosed()); m.Items.Add("删除",null,(_,_)=>DeleteNode()); m.Items.Add("移动止盈",null,(_,_)=>SetProtection("移动止盈")); m.Items.Add("成本止损",null,(_,_)=>SetProtection("成本止损")); m.Items.Add("平仓",null,(_,_)=>CloseNode()); m.Items.Add("减仓",null,(_,_)=>ReduceCurrentNode()); return m; }
-    ContextMenuStrip OrderMenu(){ var m=new ContextMenuStrip(); m.Items.Add("新增订单",null,(_,_)=>EditOrder(null)); m.Items.Add("修改订单",null,(_,_)=>EditOrder(RowId(_orderGrid))); m.Items.Add("删除订单",null,(_,_)=>DeleteOrder()); return m; }
+    ContextMenuStrip OrderMenu(){ var m=new ContextMenuStrip(); m.Items.Add("新增订单",null,(_,_)=>EditOrder(null)); m.Items.Add("修改订单",null,(_,_)=>EditOrder(RowId(_orderGrid))); m.Items.Add("删除订单",null,(_,_)=>DeleteOrder()); m.Items.Add(new ToolStripSeparator()); m.Items.Add("归类到主仓M",null,(_,_)=>ClassifyOrder("主仓M")); m.Items.Add("归类到加仓A",null,(_,_)=>ClassifyOrder("加仓A")); m.Items.Add("归类到对冲H",null,(_,_)=>ClassifyOrder("对冲H")); m.Items.Add("归类到减仓R",null,(_,_)=>ClassifyOrder("减仓R")); m.Items.Add("归类为平仓",null,(_,_)=>ClassifyOrder("平仓")); m.Items.Add("归类为资金费",null,(_,_)=>ClassifyOrder("资金费")); m.Items.Add(new ToolStripSeparator()); m.Items.Add("标记已匹配",null,(_,_)=>MarkOrder("已匹配")); m.Items.Add("标记忽略",null,(_,_)=>MarkOrder("忽略")); m.Items.Add("标记待归类",null,(_,_)=>MarkOrder("待归类")); return m; }
     ContextMenuStrip TreeMenu(){ var m=new ContextMenuStrip(); m.Items.Add("修改",null,(_,_)=>EditTreeSelected()); m.Items.Add("删除",null,(_,_)=>DeleteTreeSelected()); m.Items.Add("移动止盈",null,(_,_)=>SetTreeProtection("移动止盈")); m.Items.Add("成本止损",null,(_,_)=>SetTreeProtection("成本止损")); m.Items.Add("平仓",null,(_,_)=>CloseTreeSelected()); return m; }
     long? RowId(DataGridView g){ if(g.CurrentRow==null || !g.Columns.Contains("id")) return null; return Convert.ToInt64(g.CurrentRow.Cells["id"].Value); }
     Dictionary<string,Dictionary<string,int>> CaptureWidths(){
@@ -386,6 +386,70 @@ public sealed class MainForm:Form
         }
     }
     void EditOrder(long? id){ var row=id==null?null:_store.Query("SELECT * FROM order_mappings WHERE id=$id",("$id",id)).Rows.Cast<DataRow>().FirstOrDefault(); using var f=new OrderEditForm(row); if(f.ShowDialog(this)==DialogResult.OK){ var v=f.V; if(id==null)_store.Exec("INSERT INTO order_mappings(account_key,order_id,trade_id,side,action,price,qty,fee,funding,ts,match_status,raw_note) VALUES($a,$o,$tr,$s,$ac,$p,$q,$f,$fu,$ts,$ms,$n)",("$a",AccountKey),("$o",v.OrderId),("$tr",v.TradeId),("$s",v.Side),("$ac",v.Action),("$p",v.Price),("$q",v.Qty),("$f",v.Fee),("$fu",v.Funding),("$ts",v.Ts),("$ms",v.Match),("$n",v.Note)); else _store.Exec("UPDATE order_mappings SET order_id=$o,trade_id=$tr,side=$s,action=$ac,price=$p,qty=$q,fee=$f,funding=$fu,ts=$ts,match_status=$ms,raw_note=$n WHERE id=$id",("$o",v.OrderId),("$tr",v.TradeId),("$s",v.Side),("$ac",v.Action),("$p",v.Price),("$q",v.Qty),("$f",v.Fee),("$fu",v.Funding),("$ts",v.Ts),("$ms",v.Match),("$n",v.Note),("$id",id)); RefreshKeepWidths(); } }
+    string[] ActiveMainTargets(){ return _store.Query("SELECT code FROM main_positions WHERE account_key=$a AND status<>'已平仓' ORDER BY id",("$a",AccountKey)).Rows.Cast<DataRow>().Select(r=>Convert.ToString(r[0])??"").Where(x=>!string.IsNullOrWhiteSpace(x)).ToArray(); }
+    string[] NodeTargets(string nodeType){ return _store.Query("SELECT main_code||'-'||code FROM position_nodes WHERE account_key=$a AND node_type=$t AND status<>'已平仓' ORDER BY id",("$a",AccountKey),("$t",nodeType)).Rows.Cast<DataRow>().Select(r=>Convert.ToString(r[0])??"").Where(x=>!string.IsNullOrWhiteSpace(x)).ToArray(); }
+    string[] CloseTargets(){
+        var list=new List<string>();
+        foreach(var m in ActiveMainTargets()) list.Add("主仓:"+m);
+        var rows=_store.Query("SELECT node_type||':'||main_code||'-'||code FROM position_nodes WHERE account_key=$a AND node_type IN ('加仓','对冲') AND status<>'已平仓' ORDER BY id",("$a",AccountKey));
+        foreach(DataRow r in rows.Rows){ var v=Convert.ToString(r[0]); if(!string.IsNullOrWhiteSpace(v)) list.Add(v); }
+        return list.ToArray();
+    }
+    string[] FundingTargets(){ var list=new List<string>(); foreach(var m in ActiveMainTargets()) list.Add("主仓:"+m); foreach(var t in NodeTargets("加仓")) list.Add("加仓:"+t); foreach(var t in NodeTargets("对冲")) list.Add("对冲:"+t); return list.Count>0?list.ToArray():new[]{"未指定"}; }
+    DataRow? CurrentOrderRow(){ var id=RowId(_orderGrid); if(id==null)return null; var dt=_store.Query("SELECT * FROM order_mappings WHERE id=$id",("$id",id)); return dt.Rows.Count>0?dt.Rows[0]:null; }
+    static string SVal(DataRow r,string c)=>r.Table.Columns.Contains(c)?Convert.ToString(r[c])??"":"";
+    void MarkOrder(string status){ var id=RowId(_orderGrid); if(id==null)return; _store.Exec("UPDATE order_mappings SET match_status=$s WHERE id=$id",("$s",status),("$id",id)); RefreshKeepWidths(); }
+    void ClassifyOrder(string kind){
+        var id=RowId(_orderGrid); if(id==null){ MessageBox.Show(this,"请先选择一条订单"); return; }
+        var r=CurrentOrderRow(); if(r==null)return;
+        var orderId=SVal(r,"order_id"); var ts=SVal(r,"ts"); var action=SVal(r,"action"); var note=SVal(r,"raw_note");
+        var price=Dec(r["price"]); var qty=Dec(r["qty"]); var fee=Dec(r["fee"]); var funding=Dec(r["funding"]);
+        string[] targets = kind switch{
+            "主仓M" => ActiveMainTargets(),
+            "加仓A" => NodeTargets("加仓"),
+            "对冲H" => NodeTargets("对冲"),
+            "减仓R" => NodeTargets("减仓"),
+            "平仓" => CloseTargets(),
+            "资金费" => FundingTargets(),
+            _ => Array.Empty<string>()
+        };
+        if(targets.Length==0){ MessageBox.Show(this,"没有可归类的目标，请先建立对应主仓/加仓/对冲/减仓记录。","无法归类"); return; }
+        using var f=new SimpleComboForm("订单归类 - "+kind,
+            new FieldSpec("目标编号","combo",targets,targets.First()),
+            new FieldSpec("覆盖目标价格/数量/手续费","combo",new[]{"是","否"},"是"),
+            new FieldSpec("平仓类型","combo",new[]{"止损","成本止损","移动止盈","手动平仓"}, kind=="平仓"?"手动平仓":"手动平仓"),
+            new FieldSpec("备注","text",Default:string.IsNullOrWhiteSpace(note)?$"由订单 {orderId} 归类":note));
+        if(f.ShowDialog(this)!=DialogResult.OK)return;
+        var target=f.Values[0]; var overwrite=f.Values[1]=="是"; var closeType=f.Values[2]; var newNote=f.Values[3];
+        try{
+            if(kind=="主仓M"){
+                _store.Exec("UPDATE main_positions SET avg_price=CASE WHEN $ow=1 THEN $p ELSE avg_price END,base_qty=CASE WHEN $ow=1 THEN $q ELSE base_qty END,fee=CASE WHEN $ow=1 THEN $f ELSE fee END,created_at=CASE WHEN $ow=1 THEN $ts ELSE created_at END,exchange_open_order_id=CASE WHEN $ow=1 THEN $oid ELSE exchange_open_order_id END,status='持有中',note=$n WHERE account_key=$a AND code=$c",
+                    ("$ow",overwrite?1:0),("$p",price),("$q",qty),("$f",fee),("$ts",ts),("$oid",orderId),("$n",newNote),("$a",AccountKey),("$c",target));
+            }else if(kind=="加仓A"||kind=="对冲H"||kind=="减仓R"){
+                var parts=target.Split('-'); var main=parts.Length>1?parts[0]:""; var code=parts.Length>1?parts[1]:target; var nodeType=kind=="加仓A"?"加仓":kind=="对冲H"?"对冲":"减仓";
+                _store.Exec("UPDATE position_nodes SET entry_price=CASE WHEN $ow=1 THEN $p ELSE entry_price END,qty=CASE WHEN $ow=1 THEN $q ELSE qty END,fee=CASE WHEN $ow=1 THEN $f ELSE fee END,created_at=CASE WHEN $ow=1 THEN $ts ELSE created_at END,exchange_open_order_id=CASE WHEN $ow=1 THEN $oid ELSE exchange_open_order_id END,status=CASE WHEN status='已平仓' THEN status ELSE '持有中' END,note=$n WHERE account_key=$a AND main_code=$m AND code=$c AND node_type=$t",
+                    ("$ow",overwrite?1:0),("$p",price),("$q",qty),("$f",fee),("$ts",ts),("$oid",orderId),("$n",newNote),("$a",AccountKey),("$m",main),("$c",code),("$t",nodeType));
+            }else if(kind=="平仓"){
+                var seg=target.Split(':',2); var typ=seg[0]; var codeFull=seg.Length>1?seg[1]:target;
+                if(typ=="主仓"){
+                    _store.Exec("UPDATE main_positions SET close_price=$p,close_type=$ct,base_qty=CASE WHEN $ow=1 AND $q>0 THEN $q ELSE base_qty END,fee=fee+$f,close_time=$ts,exchange_close_order_id=$oid,status='已平仓',floating_pnl=(CASE WHEN direction='空' THEN (avg_price-$p)*base_qty ELSE ($p-avg_price)*base_qty END)-fee-$f,note=$n WHERE account_key=$a AND code=$c",
+                        ("$p",price),("$ct",closeType),("$ow",overwrite?1:0),("$q",qty),("$f",fee),("$ts",ts),("$oid",orderId),("$n",newNote),("$a",AccountKey),("$c",codeFull));
+                }else{
+                    var parts=codeFull.Split('-'); var main=parts.Length>1?parts[0]:""; var code=parts.Length>1?parts[1]:codeFull;
+                    _store.Exec("UPDATE position_nodes SET close_exit_price=$p,close_type=$ct,qty=CASE WHEN $ow=1 AND $q>0 THEN $q ELSE qty END,fee=fee+$f,close_time=$ts,exchange_close_order_id=$oid,status='已平仓',floating_pnl=(CASE WHEN direction='空' THEN (entry_price-$p)*qty ELSE ($p-entry_price)*qty END)-fee-$f,note=$n WHERE account_key=$a AND main_code=$m AND code=$c AND node_type=$t",
+                        ("$p",price),("$ct",closeType),("$ow",overwrite?1:0),("$q",qty),("$f",fee),("$ts",ts),("$oid",orderId),("$n",newNote),("$a",AccountKey),("$m",main),("$c",code),("$t",typ));
+                }
+            }else if(kind=="资金费"){
+                long? nodeId=null; string mainCode=""; var seg=target.Split(':',2); var codeFull=seg.Length>1?seg[1]:"";
+                if(seg[0]=="主仓") mainCode=codeFull; else if(codeFull.Contains('-')){ var parts=codeFull.Split('-'); mainCode=parts[0]; var code=parts[1]; var node=_store.Scalar("SELECT id FROM position_nodes WHERE account_key=$a AND main_code=$m AND code=$c",("$a",AccountKey),("$m",mainCode),("$c",code)); if(node!=null&&node!=DBNull.Value) nodeId=Convert.ToInt64(node); }
+                var amt=funding!=0?funding:fee;
+                _store.Exec("INSERT INTO funding_records(account_key,main_code,node_id,amount,ts,source,note) VALUES($a,$m,$nid,$amt,$ts,$src,$n)",("$a",AccountKey),("$m",mainCode),("$nid",nodeId),("$amt",amt),("$ts",ts),("$src",orderId),("$n",newNote));
+            }
+            _store.Exec("UPDATE order_mappings SET match_status='已匹配', action=$act, raw_note=$n WHERE id=$id",("$act",kind),("$n",$"已归类到 {target}；{newNote}"),("$id",id));
+            RefreshKeepWidths();
+            MessageBox.Show(this,$"订单已归类到 {target}","归类成功");
+        }catch(Exception ex){ MessageBox.Show(this,ex.Message,"归类失败"); }
+    }
     void DeleteMain(){ var id=RowId(_mainGrid); if(id==null)return; if(MessageBox.Show(this,"删除主仓会同时删除该主仓节点，确定？","确认",MessageBoxButtons.YesNo,MessageBoxIcon.Warning)==DialogResult.Yes){ var code=Convert.ToString(_store.Scalar("SELECT code FROM main_positions WHERE id=$id",("$id",id)))??""; _store.Exec("DELETE FROM position_nodes WHERE account_key=$a AND main_code=$m",("$a",AccountKey),("$m",code)); _store.Exec("DELETE FROM main_positions WHERE id=$id",("$id",id)); RefreshKeepWidths(); } }
     void DeleteNode(){ var id=CurrentNodeId(); if(id==null)return; if(MessageBox.Show(this,"删除选中节点？","确认",MessageBoxButtons.YesNo)==DialogResult.Yes){ _store.Exec("DELETE FROM position_nodes WHERE id=$id",("$id",id)); RefreshKeepWidths(); } }
     void DeleteOrder(){ var id=RowId(_orderGrid); if(id==null)return; if(MessageBox.Show(this,"删除选中订单？","确认",MessageBoxButtons.YesNo)==DialogResult.Yes){ _store.Exec("DELETE FROM order_mappings WHERE id=$id",("$id",id)); RefreshKeepWidths(); } }
