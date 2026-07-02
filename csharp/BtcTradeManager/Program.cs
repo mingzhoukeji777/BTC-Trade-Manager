@@ -136,7 +136,7 @@ public sealed class MainForm:Form
     string AccountKey => _account.SelectedIndex==0 ? "BINANCE_UM" : "OKX_COIN";
     public MainForm()
     {
-        Text="BTC交易管理系统 v0.7.3"; Font=new Font("Microsoft YaHei",9); StartPosition=FormStartPosition.CenterScreen; MinimumSize=new Size(1120,680); Size=new Size(1360,820); LoadUi(); BuildUi(); RefreshAll();
+        Text="BTC交易管理系统 v0.7.4"; Font=new Font("Microsoft YaHei",9); StartPosition=FormStartPosition.CenterScreen; MinimumSize=new Size(1120,680); Size=new Size(1360,820); LoadUi(); BuildUi(); RefreshAll();
         _timer.Interval=Math.Max(1,_store.Config.RefreshSeconds)*1000; _timer.Tick+=(_,_)=>RefreshLiveOnly(); _timer.Start(); FormClosing+=(_,_)=>SaveUi(); ResizeEnd+=(_,_)=>SaveUi(); Move+=(_,_)=>SaveUi();
     }
     static DataGridView Grid(){
@@ -156,7 +156,7 @@ public sealed class MainForm:Form
         _tabs.TabPages.Add(Page("总控", _summary)); _tabs.TabPages.Add(Page("主仓M", WithMenu(_mainGrid, MainMenu()))); _tabs.TabPages.Add(Page("主仓树", WithMenu(_tree, TreeMenu()))); _tabs.TabPages.Add(Page("加仓A", WithMenu(_addGrid, NodeMenu()))); _tabs.TabPages.Add(Page("对冲H", WithMenu(_hedgeGrid, NodeMenu()))); _tabs.TabPages.Add(Page("减仓R", WithMenu(_reduceGrid, NodeMenu()))); _tabs.TabPages.Add(Page("已平仓", WithMenu(_closedGrid, NodeMenu()))); _tabs.TabPages.Add(Page("订单映射/待归类", WithMenu(_orderGrid, OrderMenu()))); _tabs.TabPages.Add(Page("风险总控", _riskGrid)); _tabs.TabPages.Add(Page("情景模拟", _scenarioGrid));
         _mainGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditMain(RowId(_mainGrid)); }; _nodeGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditNode(RowId(_nodeGrid)); }; _addGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditNode(RowId(_addGrid)); }; _hedgeGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditNode(RowId(_hedgeGrid)); }; _reduceGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditNode(RowId(_reduceGrid)); }; _closedGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditClosed(RowId(_closedGrid)); }; _orderGrid.CellDoubleClick += (_,e)=>{ if(e.RowIndex>=0) EditOrder(RowId(_orderGrid)); }; foreach(var dg in new[]{_summary,_mainGrid,_addGrid,_hedgeGrid,_reduceGrid,_closedGrid,_orderGrid,_riskGrid,_scenarioGrid}) dg.ColumnWidthChanged+=(_,_)=>{ if(!_loadingUi && !_applyingLayout) SaveUi(); };
     }
-    void NameGrids(){ _summary.Name="总控"; _summary.Font=new Font("Microsoft YaHei",14,FontStyle.Regular); _summary.DefaultCellStyle.Font=new Font("Microsoft YaHei",14,FontStyle.Regular); _summary.ColumnHeadersDefaultCellStyle.Font=new Font("Microsoft YaHei",13,FontStyle.Bold); _summary.RowTemplate.Height=42; _summary.RowTemplate.DefaultCellStyle.Font=new Font("Microsoft YaHei",14,FontStyle.Regular); _summary.DefaultCellStyle.WrapMode=DataGridViewTriState.True; _summary.AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill; _summary.BackgroundColor=Color.White; _mainGrid.Name="主仓M"; _addGrid.Name="加仓A"; _hedgeGrid.Name="对冲H"; _reduceGrid.Name="减仓R"; _closedGrid.Name="已平仓"; _orderGrid.Name="订单"; _riskGrid.Name="风险"; _scenarioGrid.Name="情景"; }
+    void NameGrids(){ _summary.Name="总控"; _summary.Font=new Font("Microsoft YaHei",14,FontStyle.Regular); _summary.DefaultCellStyle.Font=new Font("Microsoft YaHei",14,FontStyle.Regular); _summary.ColumnHeadersDefaultCellStyle.Font=new Font("Microsoft YaHei",13,FontStyle.Bold); _summary.RowTemplate.Height=42; _summary.RowTemplate.DefaultCellStyle.Font=new Font("Microsoft YaHei",14,FontStyle.Regular); _summary.DefaultCellStyle.WrapMode=DataGridViewTriState.True; _summary.AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill; _summary.BackgroundColor=Color.White; _mainGrid.Name="主仓M"; _addGrid.Name="加仓A"; _hedgeGrid.Name="对冲H"; _reduceGrid.Name="减仓R"; _closedGrid.Name="已平仓"; _orderGrid.Name="订单"; _riskGrid.Name="风险"; _riskGrid.Font=new Font("Microsoft YaHei",13,FontStyle.Regular); _riskGrid.DefaultCellStyle.Font=new Font("Microsoft YaHei",13,FontStyle.Regular); _riskGrid.ColumnHeadersDefaultCellStyle.Font=new Font("Microsoft YaHei",13,FontStyle.Bold); _riskGrid.RowTemplate.Height=44; _scenarioGrid.Name="情景"; }
     ImageList BuildStatusImages(){ var il=new ImageList{ImageSize=new Size(16,16),ColorDepth=ColorDepth.Depth32Bit}; il.Images.Add("red",Circle(Color.Red)); il.Images.Add("yellow",Circle(Color.Gold)); il.Images.Add("green",Circle(Color.LimeGreen)); il.Images.Add("gray",Circle(Color.Gray)); return il; }
     Bitmap Circle(Color c){ var bmp=new Bitmap(16,16); using var g=Graphics.FromImage(bmp); g.SmoothingMode=System.Drawing.Drawing2D.SmoothingMode.AntiAlias; using var b=new SolidBrush(c); using var p=new Pen(Color.Black,1); g.FillEllipse(b,2,2,12,12); g.DrawEllipse(p,2,2,12,12); return bmp; }
     string StatusKey(string? s)=>(s=="持有中"||s=="持仓中")?"red":s=="成本止损"?"yellow":s=="移动止盈"?"green":"gray";
@@ -211,7 +211,7 @@ public sealed class MainForm:Form
             }
             g.Columns[i].ValueType=typeof(string);
         }
-        if(g.Columns.Contains("id")) g.Columns["id"].Visible=false; g.EnableHeadersVisualStyles=false; g.ColumnHeadersDefaultCellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; g.DefaultCellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; foreach(DataGridViewColumn c in g.Columns){ c.DefaultCellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; c.HeaderCell.Style.Alignment=DataGridViewContentAlignment.MiddleCenter; c.HeaderCell.Style.Font=g.ColumnHeadersDefaultCellStyle.Font; } if(!ReferenceEquals(g,_summary)) ApplyGridWidths(g); else ApplySummaryLayout();
+        if(g.Columns.Contains("id")) g.Columns["id"].Visible=false; g.EnableHeadersVisualStyles=false; g.ColumnHeadersDefaultCellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; g.DefaultCellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; foreach(DataGridViewColumn c in g.Columns){ c.DefaultCellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; c.HeaderCell.Style.Alignment=DataGridViewContentAlignment.MiddleCenter; c.HeaderCell.Style.Font=g.ColumnHeadersDefaultCellStyle.Font; } if(ReferenceEquals(g,_summary)) ApplySummaryLayout(); else if(ReferenceEquals(g,_riskGrid)) ApplyRiskLayout(); else ApplyGridWidths(g);
         if(g.Columns.Contains("浮动收益")||g.Columns.Contains("盈亏")||g.Columns.Contains("盈亏金额")){ g.CellFormatting-=Grid_CellFormatting; g.CellFormatting+=Grid_CellFormatting; } try{ g.ClearSelection(); g.CurrentCell=null; }catch{}
     }
     void ApplySummaryLayout(){
@@ -238,6 +238,27 @@ public sealed class MainForm:Form
             foreach(DataGridViewRow r in _summary.Rows) if(r.Height<42) r.Height=42;
         }catch{} finally{ _applyingLayout=false; }
     }
+    void ApplyRiskLayout(){
+        try{
+            _applyingLayout=true;
+            _riskGrid.AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.None;
+            _riskGrid.EnableHeadersVisualStyles=false;
+            _riskGrid.DefaultCellStyle.WrapMode=DataGridViewTriState.True;
+            _riskGrid.BackgroundColor=Color.White;
+            foreach(DataGridViewColumn c in _riskGrid.Columns){
+                c.DefaultCellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter;
+                c.HeaderCell.Style.Alignment=DataGridViewContentAlignment.MiddleCenter;
+                c.HeaderCell.Style.Font=_riskGrid.ColumnHeadersDefaultCellStyle.Font;
+            }
+            var total=Math.Max(900,_riskGrid.ClientSize.Width-24);
+            if(_riskGrid.Columns.Contains("分类")) _riskGrid.Columns["分类"].Width=Math.Max(120,(int)(total*0.14));
+            if(_riskGrid.Columns.Contains("项目")) _riskGrid.Columns["项目"].Width=Math.Max(150,(int)(total*0.18));
+            if(_riskGrid.Columns.Contains("结果")) _riskGrid.Columns["结果"].Width=Math.Max(220,(int)(total*0.22));
+            if(_riskGrid.Columns.Contains("说明")) _riskGrid.Columns["说明"].Width=Math.Max(360,total-(_riskGrid.Columns.Contains("分类")?_riskGrid.Columns["分类"].Width:0)-(_riskGrid.Columns.Contains("项目")?_riskGrid.Columns["项目"].Width:0)-(_riskGrid.Columns.Contains("结果")?_riskGrid.Columns["结果"].Width:0));
+            _riskGrid.AutoResizeRows(DataGridViewAutoSizeRowsMode.AllCells);
+            foreach(DataGridViewRow r in _riskGrid.Rows) if(r.Height<44) r.Height=44;
+        }catch{} finally{ _applyingLayout=false; }
+    }
     void ApplyGridWidths(DataGridView g){
         try{
             if(g.Columns.Count==0 || g.IsDisposed) return;
@@ -262,9 +283,39 @@ public sealed class MainForm:Form
         }catch{} finally{ _applyingLayout=false; }
     }
     void Grid_DataError(object? sender, DataGridViewDataErrorEventArgs e){ e.ThrowException=false; e.Cancel=true; }
-    void Grid_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e){ var g=sender as DataGridView; if(g==null||e.RowIndex<0||e.ColumnIndex<0)return; var col=g.Columns[e.ColumnIndex].Name; if((col=="浮动收益"||col=="盈亏金额") && e.Value!=null && decimal.TryParse(Convert.ToString(e.Value),out var v)){ e.Value=v.ToString("0.########",CultureInfo.InvariantCulture); e.FormattingApplied=true; e.CellStyle.ForeColor=v>=0?Color.Green:Color.Red; e.CellStyle.Font=new Font(g.Font,FontStyle.Bold); e.CellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; } else if(col=="盈亏" && e.Value!=null){ var txt=Convert.ToString(e.Value); e.CellStyle.ForeColor=txt=="亏"?Color.Red:Color.Green; e.CellStyle.Font=new Font(g.Font,FontStyle.Bold); e.CellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; } }
+    void Grid_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e){ var g=sender as DataGridView; if(g==null||e.RowIndex<0||e.ColumnIndex<0)return; var col=g.Columns[e.ColumnIndex].Name; if(g==_riskGrid && col=="结果" && e.Value!=null){ var txt=Convert.ToString(e.Value); if(txt=="危险") e.CellStyle.ForeColor=Color.Red; else if(txt=="警戒"||txt=="待处理") e.CellStyle.ForeColor=Color.DarkOrange; else if(txt=="正常") e.CellStyle.ForeColor=Color.Green; e.CellStyle.Font=new Font(g.Font,FontStyle.Bold); e.CellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; } else if((col=="浮动收益"||col=="盈亏金额") && e.Value!=null && decimal.TryParse(Convert.ToString(e.Value),out var v)){ e.Value=v.ToString("0.########",CultureInfo.InvariantCulture); e.FormattingApplied=true; e.CellStyle.ForeColor=v>=0?Color.Green:Color.Red; e.CellStyle.Font=new Font(g.Font,FontStyle.Bold); e.CellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; } else if(col=="盈亏" && e.Value!=null){ var txt=Convert.ToString(e.Value); e.CellStyle.ForeColor=txt=="亏"?Color.Red:Color.Green; e.CellStyle.Font=new Font(g.Font,FontStyle.Bold); e.CellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter; } }
     void LoadTree(){ _tree.BeginUpdate(); _tree.Nodes.Clear(); var mains=_store.Query("SELECT * FROM main_positions WHERE account_key=$a AND status<>'已平仓' ORDER BY id",("$a",AccountKey)); foreach(DataRow m in mains.Rows){ var n=new TreeNode($"{m["code"]} 主仓｜{m["direction"]}｜{m["status"]}"){Tag=new TagInfo("main",Convert.ToInt64(m["id"])),ImageKey=StatusKey(Convert.ToString(m["status"])),SelectedImageKey=StatusKey(Convert.ToString(m["status"]))}; _tree.Nodes.Add(n); var nodes=_store.Query("SELECT * FROM position_nodes WHERE account_key=$a AND main_code=$m AND node_type IN ('加仓','对冲') AND status<>'已平仓' ORDER BY id",("$a",AccountKey),("$m",Convert.ToString(m["code"])!)); foreach(DataRow r in nodes.Rows){ n.Nodes.Add(new TreeNode($"{r["code"]} {r["node_type"]}｜{r["direction"]}｜{r["status"]}｜{Fmt(r["qty"])}"){Tag=new TagInfo("node",Convert.ToInt64(r["id"])),ImageKey=StatusKey(Convert.ToString(r["status"])),SelectedImageKey=StatusKey(Convert.ToString(r["status"]))}); } n.Expand(); } _tree.EndUpdate(); }
-    void LoadRisk(){ var root=_store.LoadLatest(out _); var s=FindSnap(root); var dt=new DataTable(); foreach(var c in new[]{"项目","结果","说明"})dt.Columns.Add(c); dt.Rows.Add("账户",_account.Text,"Binance/OKX独立主仓"); dt.Rows.Add("采集状态",s?.Status??"无数据",s?.LastSuccess??""); dt.Rows.Add("实时价格",FmtStr(s?.Price,1),"latest_snapshot"); dt.Rows.Add("持仓",Pos(s?.Position),"交易所真实持仓"); dt.Rows.Add("强平距离",LiqDistance(s),"标记价到强平价"); dt.Rows.Add("节点数量",_store.Scalar("SELECT COUNT(*) FROM position_nodes WHERE account_key=$a",("$a",AccountKey))?.ToString()??"0","A/H/TP/SL/R"); dt.Rows.Add("待归类订单",_store.Scalar("SELECT COUNT(*) FROM order_mappings WHERE account_key=$a AND match_status='待归类'",("$a",AccountKey))?.ToString()??"0","需要手动处理"); _riskGrid.DataSource=dt; HideId(_riskGrid); }
+    void LoadRisk(){
+        var root=_store.LoadLatest(out _); var s=FindSnap(root);
+        var dt=new DataTable(); foreach(var c in new[]{"分类","项目","结果","说明"})dt.Columns.Add(c);
+        var mark=Dec(s?.Mark); var liq=Dec(s?.Liq); var dist=mark>0&&liq>0?Math.Abs(liq-mark)/mark*100m:0m;
+        var nodeCount=Convert.ToString(_store.Scalar("SELECT COUNT(*) FROM position_nodes WHERE account_key=$a",("$a",AccountKey)))??"0";
+        var pending=Convert.ToString(_store.Scalar("SELECT COUNT(*) FROM order_mappings WHERE account_key=$a AND match_status='待归类'",("$a",AccountKey)))??"0";
+        var activeMain=Convert.ToString(_store.Scalar("SELECT COUNT(*) FROM main_positions WHERE account_key=$a AND status<>'已平仓'",("$a",AccountKey)))??"0";
+        var activeNodes=Convert.ToString(_store.Scalar("SELECT COUNT(*) FROM position_nodes WHERE account_key=$a AND status<>'已平仓'",("$a",AccountKey)))??"0";
+        var stopNodes=Convert.ToString(_store.Scalar("SELECT COUNT(*) FROM position_nodes WHERE account_key=$a AND status='成本止损'",("$a",AccountKey)))??"0";
+        var trailNodes=Convert.ToString(_store.Scalar("SELECT COUNT(*) FROM position_nodes WHERE account_key=$a AND status='移动止盈'",("$a",AccountKey)))??"0";
+        var verdict="正常"; var desc="当前没有触发硬性风险提示";
+        if(s==null){ verdict="无数据"; desc="未读取到 latest_snapshot.json，请先运行 BTC实时通信系统"; }
+        else if(dist>0 && dist<5){ verdict="危险"; desc="强平距离小于 5%，需要立即检查仓位/保证金/止损"; }
+        else if(dist>0 && dist<10){ verdict="警戒"; desc="强平距离小于 10%，建议减少风险或提高保证金"; }
+        else if(pending!="0"){ verdict="待处理"; desc="存在待归类订单，可能影响手续费/平仓/盈亏统计"; }
+        dt.Rows.Add("总览","风险结论",verdict,desc);
+        dt.Rows.Add("账户","当前账户",_account.Text,"Binance U本位和 OKX 币本位主仓独立管理");
+        dt.Rows.Add("采集","采集状态",s?.Status??"无数据",s?.LastSuccess??"请检查采集器 latest_snapshot.json");
+        dt.Rows.Add("行情","实时价格",FmtStr(s?.Price,1),"采集器最新成交/盘口价格");
+        dt.Rows.Add("行情","标记价",FmtStr(s?.Mark,1),"用于强平距离和风控参考");
+        dt.Rows.Add("仓位","交易所持仓",Pos(s?.Position),"交易所真实持仓方向和数量");
+        dt.Rows.Add("仓位","强平价",FmtStr(s?.Liq,1),"交易所返回强平价格");
+        dt.Rows.Add("风险","强平距离",LiqDistance(s),"标记价到强平价距离；越小越危险");
+        dt.Rows.Add("结构","活跃主仓",activeMain,"未平仓主仓数量");
+        dt.Rows.Add("结构","活跃节点",activeNodes,"当前仍在管理中的加仓/对冲/减仓等节点");
+        dt.Rows.Add("结构","总节点数量",nodeCount,"A/H/TP/SL/R 等全部节点数量");
+        dt.Rows.Add("保护","成本止损节点",stopNodes,"已设置成本止损状态的节点数量");
+        dt.Rows.Add("保护","移动止盈节点",trailNodes,"已设置移动止盈状态的节点数量");
+        dt.Rows.Add("订单","待归类订单",pending,"需要手动处理；会影响成交归属、手续费和复盘准确性");
+        _riskGrid.DataSource=dt; HideId(_riskGrid);
+    }
     void LoadScenario(){ _scenarioGrid.DataSource=_store.Query("SELECT id,target_price AS 目标价,created_at AS 时间,result_json AS 结果 FROM scenario_runs WHERE account_key=$a ORDER BY id DESC",("$a",AccountKey)); HideId(_scenarioGrid); }
     void BuildSummary(){ var root=_store.LoadLatest(out var err); var snap=FindSnap(root); var dt=new DataTable(); foreach(var c in new[]{"项目","数值","说明"})dt.Columns.Add(c); if(root==null){ dt.Rows.Add("采集器",err,"请先运行BTC实时通信系统"); _summary.DataSource=dt; return;} dt.Rows.Add("当前主仓",_account.Text,"Binance/OKX独立切换"); dt.Rows.Add("更新时间",root.updated_at??"--","latest_snapshot.json"); dt.Rows.Add("状态",snap?.Status??"--",snap?.LastSuccess??""); dt.Rows.Add("实时价格",FmtStr(snap?.Price,1),"WebSocket/采集器"); dt.Rows.Add("标记价",FmtStr(snap?.Mark,1),"用于风险参考"); dt.Rows.Add("强平价",FmtStr(snap?.Liq,1),"交易所返回"); dt.Rows.Add("持仓",Pos(snap?.Position),"交易所真实持仓"); dt.Rows.Add("浮动收益",FmtStr(snap?.Upnl,4),"浮盈绿色/浮亏红色在表格显示"); dt.Rows.Add("强平距离",LiqDistance(snap),"标记价到强平价"); _summary.DataSource=dt; HideId(_summary); _status.Text=$"{_account.Text} | {DateTime.Now:HH:mm:ss}"; }
     CollectorSnapshot? FindSnap(SnapshotRoot? root)=>root==null?null:(AccountKey=="BINANCE_UM"?root.snapshots.FirstOrDefault(x=>x.Exchange.StartsWith("Binance")):root.snapshots.FirstOrDefault(x=>x.Exchange.StartsWith("OKX")));
